@@ -1,0 +1,5 @@
+# Class
+# simple structure extraction
+# jar NER
+# triples
+# visualization
