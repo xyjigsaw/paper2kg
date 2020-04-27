@@ -6,6 +6,8 @@
 # *_*coding:utf-8 *_*
 
 from xml.dom.minidom import parse
+import os
+import time
 
 
 class PaperXML:
@@ -13,72 +15,203 @@ class PaperXML:
         self.dom = parse(file_path)
         self.data = self.dom.documentElement
         self.paper_title = self.get_paper_title()
-        self.paper_year = 0
+        self.paper_year = self.get_paper_year()
         self.paper_aff_dict = self.get_affiliation()
         self.author_dict = self.get_author()
         self.ref_dict = self.get_rf()
 
+        self.section_dict = self.get_secs()
+
     def get_paper_title(self):
-        return self.data.getElementsByTagName('article-title')[0].childNodes[0].nodeValue
+        try:
+            if self.paper_title:
+                return self.paper_title
+        except AttributeError:
+            return self.data.getElementsByTagName('article-title')[0].childNodes[0].nodeValue
 
     def get_paper_year(self):
-        return self.data.getElementsByTagName('article-meta')[0].getElementsByTagName('year')[0].childNodes[0].nodeValue
+        try:
+            if self.paper_year:
+                return self.paper_year
+        except AttributeError:
+            return self.data.getElementsByTagName('article-meta')[0].getElementsByTagName('year')[0].childNodes[0].nodeValue
 
     def get_affiliation(self):
-        data_range = self.data.getElementsByTagName('article-meta')[0].getElementsByTagName('contrib-group')[0]
-        aff_ls = data_range.getElementsByTagName('aff')
-        aff_dict = {}
-        for item in aff_ls:
-            aff_id = item.getElementsByTagName('label')[0].childNodes[0].nodeValue
-            aff_name = item.getElementsByTagName('institution')[0].childNodes[0].nodeValue
-            aff_dict[aff_id] = {'name': aff_name}
-            if item.getElementsByTagName('addr-line'):
-                address = item.getElementsByTagName('addr-line')[0].childNodes[0].nodeValue
-                aff_dict[aff_id]['address'] = address
-            if item.getElementsByTagName('country'):
-                country = item.getElementsByTagName('country')[0].childNodes[0].nodeValue
-                aff_dict[aff_id]['country'] = country
-        return aff_dict
+        try:
+            if self.paper_aff_dict:
+                return self.paper_aff_dict
+        except AttributeError:
+            data_range = self.data.getElementsByTagName('article-meta')[0].getElementsByTagName('contrib-group')[0]
+            aff_ls = data_range.getElementsByTagName('aff')
+            aff_dict = {}
+            for item in aff_ls:
+                aff_id = item.getElementsByTagName('label')[0].childNodes[0].nodeValue
+                aff_name = item.getElementsByTagName('institution')[0].childNodes[0].nodeValue
+                aff_dict[aff_id] = {'affiliationName': aff_name}
+                if item.getElementsByTagName('addr-line'):
+                    address = item.getElementsByTagName('addr-line')[0].childNodes[0].nodeValue
+                    aff_dict[aff_id]['address'] = address
+                if item.getElementsByTagName('country'):
+                    country = item.getElementsByTagName('country')[0].childNodes[0].nodeValue
+                    aff_dict[aff_id]['country'] = country
+            return aff_dict
 
     def get_author(self):
-        data_range = self.data.getElementsByTagName('article-meta')[0].getElementsByTagName('contrib-group')[0]
-        author_ls = data_range.getElementsByTagName('contrib')
-        author_dict = {}
-        author_rank = 0
-        for item in author_ls:
-            author_name = item.getElementsByTagName('string-name')[0].childNodes[0].nodeValue
-            email = item.getElementsByTagName('email')[0].childNodes[0].nodeValue
-            author_dict[str(author_rank)] = {'authorName': author_name, 'email': email}
-            affiliation = []
-            xref_ls = item.getElementsByTagName('xref')
-            for xref_item in xref_ls:
-                xref_val = xref_item.getAttribute('ref-type')
-                if xref_val == 'aff':
-                    affiliation.append(xref_item.childNodes[0].nodeValue)
-            author_dict[str(author_rank)]['affiliation'] = affiliation
-            author_rank += 1
-        return author_dict
+        try:
+            if self.author_dict:
+                return self.author_dict
+        except AttributeError:
+            data_range = self.data.getElementsByTagName('article-meta')[0].getElementsByTagName('contrib-group')[0]
+            author_ls = data_range.getElementsByTagName('contrib')
+            author_dict = {}
+            author_rank = 0
+            for item in author_ls:
+                author_name = item.getElementsByTagName('string-name')[0].childNodes[0].nodeValue
+                if item.getElementsByTagName('email'):
+                    email = item.getElementsByTagName('email')[0].childNodes[0].nodeValue
+                    author_dict[str(author_rank)] = {'authorName': author_name, 'email': email}
+                else:
+                    author_dict[str(author_rank)] = {'authorName': author_name}
+                affiliation = []
+                xref_ls = item.getElementsByTagName('xref')
+                for xref_item in xref_ls:
+                    xref_val = xref_item.getAttribute('ref-type')
+                    if xref_val == 'aff':
+                        affiliation.append(xref_item.childNodes[0].nodeValue)
+                author_dict[str(author_rank)]['affiliation'] = affiliation
+                author_rank += 1
+            return author_dict
 
     def get_secs(self):
-        secs = self.data.getElementsByTagName('sec')
-        for item in secs:
-            sec_title = item.getElementsByTagName('title')[0].childNodes[0].nodeValue
-            print(sec_title)
+        try:
+            if self.section_dict:
+                return self.section_dict
+        except AttributeError:
+            secs = self.data.getElementsByTagName('sec')
+            section_dict = {}
+            all_sec_text = ''
+            sec_rank = 0
+            for item in secs:
+                sec_title = item.getElementsByTagName('title')[0].childNodes[0].nodeValue
+                p_ls = item.getElementsByTagName('p')
+                p_text = ''
+                for p in p_ls:
+                    p_val = str(p.childNodes[0].nodeValue).replace('\n', ' ').strip()
+                    all_sec_text += p_val + '\n'
+                    p_text += p_val + ' '
+                if sec_title == '-':
+                    sec_title = 'abstract'
+                section_dict[str(sec_rank)] = {'sec_title': sec_title}
+                section_dict[str(sec_rank)]['text'] = p_text
+                sec_rank += 1
+            with open('all_sec_text.txt', 'w+') as f:
+                f.write(all_sec_text)
+            return section_dict
 
     def get_rf(self):
-        ref_ls = self.data.getElementsByTagName('ref')
-        rf_rank = 0
-        ref_dict = {}
-        for item in ref_ls:
-            article_title = item.getElementsByTagName('mixed-citation')[0]. \
-                getElementsByTagName('article-title')[0].childNodes[0].nodeValue
-            article_year = item.getElementsByTagName('year')[0].childNodes[0].nodeValue
-            ref_dict[str(rf_rank)] = {'paperName': article_title, 'year': article_year}
-            rf_rank += 1
-        return ref_dict
+        try:
+            if self.ref_dict:
+                return self.ref_dict
+        except AttributeError:
+            ref_ls = self.data.getElementsByTagName('ref')
+            rf_rank = 0
+            ref_dict = {}
+            for item in ref_ls:
+                try:
+                    article_title = item.getElementsByTagName('mixed-citation')[0]. \
+                        getElementsByTagName('article-title')[0].childNodes[0].nodeValue
+                    article_year = item.getElementsByTagName('year')[0].childNodes[0].nodeValue
+                    ref_dict[str(rf_rank)] = {'paperName': article_title, 'year': article_year}
+                    rf_rank += 1
+                except IndexError as e:
+                    print('PaperXML.get_rf Error:', e)
+            return ref_dict
+
+    def get_sec_id4NER(self, string):
+        res = ''
+        for key in self.section_dict:
+            if string in self.section_dict[key]['text']:
+                res = key
+        return res
+
+    def section_NER(self):
+        cmd = 'java -Xmx512m -jar toolkit/Ollie/ollie-app-latest.jar ' \
+              '--malt-model toolkit/Ollie/engmalt.linear-1.7.mco -s all_sec_text.txt'
+        res = os.popen(cmd)
+        info = res.readlines()
+        sentence = ''
+        entity_rel = {}
+        for line in info:
+            line = line.strip('\r\n')
+            if len(line) > 2 and ': (' not in line:
+                sentence = line
+                entity_rel[sentence] = []
+            elif ': (' in line:
+                confidence, triple = line.split(': ')
+                if sentence != '':
+                    entity_rel[sentence].append({'confidence': confidence, 'triple': triple})
+            elif len(line) == 0:
+                sentence = ''
+        return entity_rel
+
+    def text2kg(self):
+        entity_rel = self.section_NER()
+        d3js_data = []
+        for _key in entity_rel:
+            print('---------------------------------')
+            print(self.get_sec_id4NER(_key))
+            print(entity_rel[_key])
+            for item in entity_rel[_key]:
+                if float(item['confidence']) < 0.5:
+                    continue
+                triple = item['triple'].strip('(').strip(')').split('; ')
+                if len(triple) == 3:
+                    tri = {'source': triple[0], 'target': triple[2], 'rela': triple[1], 'type': 'resolved'}
+                    d3js_data.append(tri)
+        with open('section_d3js_data.txt', 'w+') as f:
+            f.write(str(d3js_data))
+
+    def paper2kg(self):
+        d3js_data = []
+        tri = {'source': self.paper_title, 'target': self.paper_year, 'rela': 'year', 'type': 'resolved'}
+        d3js_data.append(tri)
+        for key in self.ref_dict:
+            tri = {'source': self.paper_title, 'target': self.ref_dict[key]['paperName'],
+                   'rela': 'cites', 'type': 'resolved'}
+            d3js_data.append(tri)
+        for key in self.author_dict:
+            tri = {'source': self.paper_title, 'target': self.author_dict[key]['authorName'],
+                   'rela': 'belong to', 'type': 'resolved'}
+            d3js_data.append(tri)
+            if 'affiliation' in self.author_dict[key]:
+                for aff_id in self.author_dict[key]['affiliation']:
+                    tri = {'source': self.author_dict[key]['authorName'],
+                           'target': self.paper_aff_dict[aff_id]['affiliationName'],
+                           'rela': 'work in', 'type': 'resolved'}
+                    d3js_data.append(tri)
+                    if 'address' in self.paper_aff_dict[aff_id]:
+                        tri = {'source': self.paper_aff_dict[aff_id]['affiliationName'],
+                               'target': self.paper_aff_dict[aff_id]['address'],
+                               'rela': 'is located in', 'type': 'resolved'}
+                        d3js_data.append(tri)
+                    if 'country' in self.paper_aff_dict[aff_id]:
+                        tri = {'source': self.paper_aff_dict[aff_id]['affiliationName'],
+                               'target': self.paper_aff_dict[aff_id]['country'],
+                               'rela': 'belong to', 'type': 'resolved'}
+                        d3js_data.append(tri)
+        for key in self.section_dict:
+            tri = {'source': self.paper_title, 'target': self.section_dict[key]['sec_title'],
+                   'rela': 'has', 'type': 'resolved'}
+            d3js_data.append(tri)
+        with open('paper_d3js_data.txt', 'w+') as f:
+            f.write(str(d3js_data))
 
 
 if __name__ == '__main__':
+    start = time.time()
     paper = PaperXML('8.xml')
+    # paper.text2kg()
+    paper.paper2kg()
     print(paper.get_secs())
+    print(time.time() - start)
 
