@@ -154,7 +154,7 @@ class PaperXML:
                 sentence = ''
         return entity_rel
 
-    def text2kg(self):
+    def text2kg(self, confidence, max_entity_len):
         entity_rel = self.section_NER()
         d3js_data = []
         for _key in entity_rel:
@@ -162,12 +162,13 @@ class PaperXML:
             print(self.get_sec_id4NER(_key))
             print(entity_rel[_key])
             for item in entity_rel[_key]:
-                if float(item['confidence']) < 0.5:
+                if float(item['confidence']) < confidence:
                     continue
                 triple = item['triple'].strip('(').strip(')').split('; ')
                 if len(triple) == 3:
-                    tri = {'source': triple[0], 'target': triple[2], 'rela': triple[1], 'type': 'resolved'}
-                    d3js_data.append(tri)
+                    if len(triple[0].split()) <= 4 and len(triple[2].split()) <= 4:
+                        tri = {'source': triple[0], 'target': triple[2], 'rela': triple[1], 'type': 'resolved'}
+                        d3js_data.append(tri)
         with open('section_d3js_data.txt', 'w+') as f:
             f.write(str(d3js_data))
 
@@ -210,7 +211,7 @@ class PaperXML:
 if __name__ == '__main__':
     start = time.time()
     paper = PaperXML('8.xml')
-    # paper.text2kg()
+    paper.text2kg(0.6)
     paper.paper2kg()
     print(paper.get_secs())
     print(time.time() - start)
