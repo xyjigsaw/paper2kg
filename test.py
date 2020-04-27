@@ -5,8 +5,7 @@
 # Site: www.omegaxyz.com
 # *_*coding:utf-8 *_*
 
-from jpype import *
-jvm_path = get_default_jvm_path()
-startJVM(jvm_path, 'ea')
-java.lang.System.out.println('Success')
-shutdownJVM()
+import os
+
+cmd = 'java -Xmx512m -jar toolkit/Ollie/ollie-app-latest.jar --malt-model toolkit/Ollie/engmalt.linear-1.7.mco -s -o work.txt 8.xml'
+os.system(cmd)
