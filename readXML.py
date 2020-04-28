@@ -166,7 +166,7 @@ class PaperXML:
                     continue
                 triple = item['triple'].strip('(').strip(')').split('; ')
                 if len(triple) == 3:
-                    if len(triple[0].split()) <= 4 and len(triple[2].split()) <= 4:
+                    if len(triple[0].split()) <= max_entity_len and len(triple[2].split()) <= max_entity_len:
                         tri = {'source': triple[0], 'target': triple[2], 'rela': triple[1], 'type': 'resolved'}
                         d3js_data.append(tri)
         with open('section_d3js_data.txt', 'w+') as f:
@@ -211,7 +211,7 @@ class PaperXML:
 if __name__ == '__main__':
     start = time.time()
     paper = PaperXML('8.xml')
-    paper.text2kg(0.6)
+    paper.text2kg(0.6, 4)
     paper.paper2kg()
     print(paper.get_secs())
     print(time.time() - start)
