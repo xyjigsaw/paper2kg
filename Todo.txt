@@ -3,3 +3,8 @@
 # jar NER
 # triples
 # visualization
+
+(1) word2vec筛选停用词
+(2) 词性标注
+(3) 实体关系抽取
+(4) 生成KG
