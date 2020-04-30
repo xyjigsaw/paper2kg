@@ -8,6 +8,12 @@
 from xml.dom.minidom import parse
 import os
 import time
+import nltk
+
+'''
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+'''
 
 
 class PaperXML:
@@ -154,17 +160,37 @@ class PaperXML:
                 sentence = ''
         return entity_rel
 
-    def text2kg(self, confidence, max_entity_len):
+    def text2kg(self, confidence, max_entity_len, tags=None):
+        if tags is None:
+            tags = ['NNP', 'NNPS']
         entity_rel = self.section_NER()
         d3js_data = []
         for _key in entity_rel:
             print('---------------------------------')
+            print(_key)
+
+            candidate_words = []
+            for item in nltk.pos_tag(nltk.word_tokenize(_key)):
+                if item[1] in tags:
+                    candidate_words.append(item[0])
+            print(candidate_words)
+
             print(self.get_sec_id4NER(_key))
             print(entity_rel[_key])
             for item in entity_rel[_key]:
                 if float(item['confidence']) < confidence:
                     continue
                 triple = item['triple'].strip('(').strip(')').split('; ')
+
+                words = triple[0].split()
+                words.extend(triple[2].split())
+                flag = False
+                for w in words:
+                    if w in candidate_words:
+                        flag = True
+                if not flag:
+                    break
+
                 if len(triple) == 3:
                     if len(triple[0].split()) <= max_entity_len and len(triple[2].split()) <= max_entity_len:
                         tri = {'source': triple[0], 'target': triple[2], 'rela': triple[1], 'type': 'resolved'}
@@ -212,7 +238,5 @@ if __name__ == '__main__':
     start = time.time()
     paper = PaperXML('8.xml')
     paper.text2kg(0.6, 4)
-    paper.paper2kg()
-    print(paper.get_secs())
     print(time.time() - start)
 
