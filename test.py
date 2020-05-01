@@ -1,3 +1,20 @@
+# pip install fastapi
+# pip install uvicorn
+
+
+from fastapi import FastAPI
+
+app = FastAPI()
+
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+# uvicorn test:app --reload
+
+
+"""
 import nltk
 
 nltk.download('punkt')
@@ -10,3 +27,4 @@ for sent in sentences:
     print(sent)
     for item in nltk.pos_tag(nltk.word_tokenize(sent)):
         print(item)
+"""

@@ -140,7 +140,7 @@ class PaperXML:
                 res = key
         return res
 
-    def section_NER(self):
+    def section_NRE(self):
         cmd = 'java -Xmx512m -jar toolkit/Ollie/ollie-app-latest.jar ' \
               '--malt-model toolkit/Ollie/engmalt.linear-1.7.mco -s all_sec_text.txt'
         res = os.popen(cmd)
@@ -163,7 +163,7 @@ class PaperXML:
     def text2kg(self, confidence, max_entity_len, tags=None):
         if tags is None:
             tags = ['NNP', 'NNPS']
-        entity_rel = self.section_NER()
+        entity_rel = self.section_NRE()
         d3js_data = []
         for _key in entity_rel:
             print('---------------------------------')
@@ -239,4 +239,3 @@ if __name__ == '__main__':
     paper = PaperXML('8.xml')
     paper.text2kg(0.6, 4)
     print(time.time() - start)
-

@@ -3,8 +3,9 @@
 # jar NER
 # triples
 # visualization
+# fastapi
 
 (1) word2vec筛选停用词
-(2) 词性标注
+(2) 词性标注NNP 和 NNPS
 (3) 实体关系抽取
 (4) 生成KG
