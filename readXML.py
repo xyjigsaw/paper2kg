@@ -88,6 +88,25 @@ class PaperXML:
                 author_rank += 1
             return author_dict
 
+    def get_rf(self):
+        try:
+            if self.ref_dict:
+                return self.ref_dict
+        except AttributeError:
+            ref_ls = self.data.getElementsByTagName('ref')
+            rf_rank = 0
+            ref_dict = {}
+            for item in ref_ls:
+                try:
+                    article_title = item.getElementsByTagName('mixed-citation')[0]. \
+                        getElementsByTagName('article-title')[0].childNodes[0].nodeValue
+                    article_year = item.getElementsByTagName('year')[0].childNodes[0].nodeValue
+                    ref_dict[str(rf_rank)] = {'paperName': article_title, 'year': article_year}
+                    rf_rank += 1
+                except IndexError as e:
+                    print('PaperXML.get_rf Error:', e)
+            return ref_dict
+
     def get_secs(self):
         try:
             if self.section_dict:
@@ -113,25 +132,6 @@ class PaperXML:
             with open('all_sec_text.txt', 'w+') as f:
                 f.write(all_sec_text)
             return section_dict
-
-    def get_rf(self):
-        try:
-            if self.ref_dict:
-                return self.ref_dict
-        except AttributeError:
-            ref_ls = self.data.getElementsByTagName('ref')
-            rf_rank = 0
-            ref_dict = {}
-            for item in ref_ls:
-                try:
-                    article_title = item.getElementsByTagName('mixed-citation')[0]. \
-                        getElementsByTagName('article-title')[0].childNodes[0].nodeValue
-                    article_year = item.getElementsByTagName('year')[0].childNodes[0].nodeValue
-                    ref_dict[str(rf_rank)] = {'paperName': article_title, 'year': article_year}
-                    rf_rank += 1
-                except IndexError as e:
-                    print('PaperXML.get_rf Error:', e)
-            return ref_dict
 
     def get_sec_id4NER(self, string):
         res = ''
@@ -160,7 +160,42 @@ class PaperXML:
                 sentence = ''
         return entity_rel
 
-    def text2kg(self, confidence, max_entity_len, tags=None):
+    def paper2kg_d3js(self):
+        d3js_data = []
+        tri = {'source': self.paper_title, 'target': self.paper_year, 'rela': 'year', 'type': 'resolved'}
+        d3js_data.append(tri)
+        for key in self.ref_dict:
+            tri = {'source': self.paper_title, 'target': self.ref_dict[key]['paperName'],
+                   'rela': 'cites', 'type': 'resolved'}
+            d3js_data.append(tri)
+        for key in self.author_dict:
+            tri = {'source': self.paper_title, 'target': self.author_dict[key]['authorName'],
+                   'rela': 'belong to', 'type': 'resolved'}
+            d3js_data.append(tri)
+            if 'affiliation' in self.author_dict[key]:
+                for aff_id in self.author_dict[key]['affiliation']:
+                    tri = {'source': self.author_dict[key]['authorName'],
+                           'target': self.paper_aff_dict[aff_id]['affiliationName'],
+                           'rela': 'work in', 'type': 'resolved'}
+                    d3js_data.append(tri)
+                    if 'address' in self.paper_aff_dict[aff_id]:
+                        tri = {'source': self.paper_aff_dict[aff_id]['affiliationName'],
+                               'target': self.paper_aff_dict[aff_id]['address'],
+                               'rela': 'is located in', 'type': 'resolved'}
+                        d3js_data.append(tri)
+                    if 'country' in self.paper_aff_dict[aff_id]:
+                        tri = {'source': self.paper_aff_dict[aff_id]['affiliationName'],
+                               'target': self.paper_aff_dict[aff_id]['country'],
+                               'rela': 'belong to', 'type': 'resolved'}
+                        d3js_data.append(tri)
+        for key in self.section_dict:
+            tri = {'source': self.paper_title, 'target': self.section_dict[key]['sec_title'],
+                   'rela': 'has', 'type': 'resolved'}
+            d3js_data.append(tri)
+        with open('paper_d3js_data.txt', 'w+') as f:
+            f.write(str(d3js_data))
+
+    def text2kg_d3js(self, confidence, max_entity_len, tags=None):
         if tags is None:
             tags = ['NNP', 'NNPS']
         entity_rel = self.section_NRE()
@@ -198,44 +233,62 @@ class PaperXML:
         with open('section_d3js_data.txt', 'w+') as f:
             f.write(str(d3js_data))
 
-    def paper2kg(self):
-        d3js_data = []
-        tri = {'source': self.paper_title, 'target': self.paper_year, 'rela': 'year', 'type': 'resolved'}
-        d3js_data.append(tri)
-        for key in self.ref_dict:
-            tri = {'source': self.paper_title, 'target': self.ref_dict[key]['paperName'],
-                   'rela': 'cites', 'type': 'resolved'}
-            d3js_data.append(tri)
-        for key in self.author_dict:
-            tri = {'source': self.paper_title, 'target': self.author_dict[key]['authorName'],
-                   'rela': 'belong to', 'type': 'resolved'}
-            d3js_data.append(tri)
-            if 'affiliation' in self.author_dict[key]:
-                for aff_id in self.author_dict[key]['affiliation']:
-                    tri = {'source': self.author_dict[key]['authorName'],
-                           'target': self.paper_aff_dict[aff_id]['affiliationName'],
-                           'rela': 'work in', 'type': 'resolved'}
-                    d3js_data.append(tri)
-                    if 'address' in self.paper_aff_dict[aff_id]:
-                        tri = {'source': self.paper_aff_dict[aff_id]['affiliationName'],
-                               'target': self.paper_aff_dict[aff_id]['address'],
-                               'rela': 'is located in', 'type': 'resolved'}
-                        d3js_data.append(tri)
-                    if 'country' in self.paper_aff_dict[aff_id]:
-                        tri = {'source': self.paper_aff_dict[aff_id]['affiliationName'],
-                               'target': self.paper_aff_dict[aff_id]['country'],
-                               'rela': 'belong to', 'type': 'resolved'}
-                        d3js_data.append(tri)
-        for key in self.section_dict:
-            tri = {'source': self.paper_title, 'target': self.section_dict[key]['sec_title'],
-                   'rela': 'has', 'type': 'resolved'}
-            d3js_data.append(tri)
-        with open('paper_d3js_data.txt', 'w+') as f:
-            f.write(str(d3js_data))
+    def text2kg_api(self, confidence, max_entity_len, fine_grain=True, tags=None):
+        if tags is None:
+            tags = ['NNP', 'NNPS']
+        entity_rel = self.section_NRE()
+        data4api = {}
+        triple_id = 0
+        for _key in entity_rel:
+            # print('---------------------------------')
+            # print(_key)
+            candidate_words = []
+            for item in nltk.pos_tag(nltk.word_tokenize(_key)):
+                if item[1] in tags:
+                    candidate_words.append(item[0])
+            # print(self.get_sec_id4NER(_key))
+            # print(entity_rel[_key])
+            for item in entity_rel[_key]:
+                if float(item['confidence']) < confidence:
+                    continue
+                triple = item['triple'].strip('(').strip(')').split('; ')
+
+                if fine_grain:
+                    words = triple[0].split()
+                    words.extend(triple[2].split())
+                    flag = False
+                    for w in words:
+                        if w in candidate_words:
+                            flag = True
+                    if not flag:
+                        break
+                else:
+                    words = triple[0].split()
+                    words2 = triple[2].split()
+                    flag = False
+                    for w in words:
+                        if w in candidate_words:
+                            flag = True
+                    if not flag:
+                        break
+                    flag = False
+                    for w in words2:
+                        if w in candidate_words:
+                            flag = True
+                    if not flag:
+                        break
+
+                if len(triple) == 3:
+                    if len(triple[0].split()) <= max_entity_len and len(triple[2].split()) <= max_entity_len:
+                        tri = {'source': triple[0], 'target': triple[2], 'rela': triple[1],
+                               'confidence': item['confidence'], 'section_id': str(self.get_sec_id4NER(_key))}
+                        data4api[str(triple_id)] = tri
+                        triple_id += 1
+        return data4api
 
 
 if __name__ == '__main__':
     start = time.time()
     paper = PaperXML('8.xml')
-    paper.text2kg(0.6, 4)
+    paper.text2kg_d3js(0.6, 4)
     print(time.time() - start)
