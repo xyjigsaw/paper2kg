@@ -1,7 +1,7 @@
 # pip install fastapi
 # pip install uvicorn
 
-
+"""
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -13,8 +13,9 @@ async def root():
 
 # uvicorn test:app --reload
 
-
 """
+"""
+
 import nltk
 
 nltk.download('punkt')

@@ -8,4 +8,3 @@ Input: Paper XML data
 
 Output: KG triples
 
-

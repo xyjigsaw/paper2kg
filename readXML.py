@@ -25,7 +25,6 @@ class PaperXML:
         self.paper_aff_dict = self.get_affiliation()
         self.author_dict = self.get_author()
         self.ref_dict = self.get_rf()
-
         self.section_dict = self.get_secs()
 
     def get_paper_title(self):
@@ -133,7 +132,7 @@ class PaperXML:
                 f.write(all_sec_text)
             return section_dict
 
-    def get_sec_id4NER(self, string):
+    def get_sec_id4NRE(self, string):
         res = ''
         for key in self.section_dict:
             if string in self.section_dict[key]['text']:
@@ -195,11 +194,19 @@ class PaperXML:
         with open('paper_d3js_data.txt', 'w+') as f:
             f.write(str(d3js_data))
 
-    def text2kg_d3js(self, confidence, max_entity_len, tags=None):
+    def text2kg_d3js(self, confidence, max_entity_len, fine_grain=True, tags=None):
         if tags is None:
             tags = ['NNP', 'NNPS']
         entity_rel = self.section_NRE()
         d3js_data = []
+
+        # 4 paper->section
+        for key in self.section_dict:
+            tri = {'source': self.paper_title, 'target': self.section_dict[key]['sec_title'],
+                   'rela': 'has', 'type': 'resolved'}
+            d3js_data.append(tri)
+
+        # 4 section->entity and entity->entity
         for _key in entity_rel:
             print('---------------------------------')
             print(_key)
@@ -210,26 +217,53 @@ class PaperXML:
                     candidate_words.append(item[0])
             print(candidate_words)
 
-            print(self.get_sec_id4NER(_key))
+            print(self.get_sec_id4NRE(_key))
             print(entity_rel[_key])
             for item in entity_rel[_key]:
                 if float(item['confidence']) < confidence:
                     continue
                 triple = item['triple'].strip('(').strip(')').split('; ')
 
-                words = triple[0].split()
-                words.extend(triple[2].split())
-                flag = False
-                for w in words:
-                    if w in candidate_words:
-                        flag = True
-                if not flag:
-                    break
+                if fine_grain:
+                    words = triple[0].split()
+                    words.extend(triple[2].split())
+                    flag = False
+                    for w in words:
+                        if w in candidate_words:
+                            flag = True
+                    if not flag:
+                        break
+                else:
+                    words = triple[0].split()
+                    words2 = triple[2].split()
+                    flag = False
+                    for w in words:
+                        if w in candidate_words:
+                            flag = True
+                    if not flag:
+                        break
+                    flag = False
+                    for w in words2:
+                        if w in candidate_words:
+                            flag = True
+                    if not flag:
+                        break
 
                 if len(triple) == 3:
                     if len(triple[0].split()) <= max_entity_len and len(triple[2].split()) <= max_entity_len:
+                        section_id = str(self.get_sec_id4NRE(_key))
                         tri = {'source': triple[0], 'target': triple[2], 'rela': triple[1], 'type': 'resolved'}
                         d3js_data.append(tri)
+                        try:
+                            tri = {'source': triple[0], 'target': self.section_dict[section_id]['sec_title'],
+                                'rela': 'exists in', 'type': 'resolved'}
+                            d3js_data.append(tri)
+                            tri = {'source': triple[2], 'target': self.section_dict[section_id]['sec_title'],
+                                   'rela': 'exists in', 'type': 'resolved'}
+                            d3js_data.append(tri)
+                        except KeyError as e:
+                            print(e, triple[0], triple[2])
+
         with open('section_d3js_data.txt', 'w+') as f:
             f.write(str(d3js_data))
 
@@ -239,6 +273,16 @@ class PaperXML:
         entity_rel = self.section_NRE()
         data4api = {}
         triple_id = 0
+
+        # 4 paper->section
+        for key in self.section_dict:
+            tri = {'source': self.paper_title, 'target': self.section_dict[key]['sec_title'], 'rela': 'has',
+                   'confidence': '1.0',
+                   'ext_info': {'type': 'paper2section', 'section_id': key}}
+            data4api[str(triple_id)] = tri
+            triple_id += 1
+
+        # 4 section->entity and entity->entity
         for _key in entity_rel:
             # print('---------------------------------')
             # print(_key)
@@ -280,15 +324,35 @@ class PaperXML:
 
                 if len(triple) == 3:
                     if len(triple[0].split()) <= max_entity_len and len(triple[2].split()) <= max_entity_len:
+                        section_id = str(self.get_sec_id4NRE(_key))
                         tri = {'source': triple[0], 'target': triple[2], 'rela': triple[1],
-                               'confidence': item['confidence'], 'section_id': str(self.get_sec_id4NER(_key))}
+                               'confidence': item['confidence'],
+                               'ext_info': {'type': 'entity2entity', 'section_id': section_id}}
                         data4api[str(triple_id)] = tri
                         triple_id += 1
+                        try:
+                            tri = {'source': triple[0], 'target': self.section_dict[section_id]['sec_title'],
+                                   'rela': 'exists in',
+                                   'confidence': '1.0',
+                                   'ext_info': {'type': 'section2entity', 'section_id': section_id}}
+                            data4api[str(triple_id)] = tri
+                            triple_id += 1
+
+                            tri = {'source': triple[2], 'target': self.section_dict[section_id]['sec_title'],
+                                   'rela': 'exists in',
+                                   'confidence': '1.0',
+                                   'ext_info': {'type': 'section2entity', 'section_id': section_id}}
+                            data4api[str(triple_id)] = tri
+                            triple_id += 1
+                        except KeyError as e:
+                            print(e, triple[0], triple[2])
+
         return data4api
 
 
 if __name__ == '__main__':
     start = time.time()
     paper = PaperXML('8.xml')
-    paper.text2kg_d3js(0.6, 4)
+    # print(paper.get_secs())
+    paper.text2kg_d3js(confidence=0.6, max_entity_len=4, fine_grain=False)
     print(time.time() - start)
