@@ -159,7 +159,7 @@ class PaperXML:
                 sentence = ''
         return entity_rel
 
-    def paper2kg_d3js(self):
+    def paper2kg_d3js_basicInfo(self):
         d3js_data = []
         tri = {'source': self.paper_title, 'target': self.paper_year, 'rela': 'year', 'type': 'resolved'}
         d3js_data.append(tri)
@@ -194,7 +194,7 @@ class PaperXML:
         with open('paper_d3js_data.txt', 'w+') as f:
             f.write(str(d3js_data))
 
-    def text2kg_d3js(self, confidence, max_entity_len, fine_grain=True, tags=None):
+    def paper2kg_d3js(self, confidence, max_entity_len, fine_grain=True, tags=None):
         if tags is None:
             tags = ['NNP', 'NNPS']
         entity_rel = self.section_NRE()
@@ -267,7 +267,7 @@ class PaperXML:
         with open('section_d3js_data.txt', 'w+') as f:
             f.write(str(d3js_data))
 
-    def text2kg_api(self, confidence, max_entity_len, fine_grain=True, tags=None):
+    def paper2kg_api(self, confidence, max_entity_len, fine_grain=True, tags=None):
         if tags is None:
             tags = ['NNP', 'NNPS']
         entity_rel = self.section_NRE()
@@ -354,5 +354,5 @@ if __name__ == '__main__':
     start = time.time()
     paper = PaperXML('8.xml')
     # print(paper.get_secs())
-    paper.text2kg_d3js(confidence=0.6, max_entity_len=4, fine_grain=False)
+    paper.paper2kg_d3js(confidence=0.6, max_entity_len=4, fine_grain=False)
     print(time.time() - start)
