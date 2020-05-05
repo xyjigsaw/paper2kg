@@ -7,15 +7,16 @@
 
 import uvicorn
 from fastapi import FastAPI
-from readXML import PaperXML
 from pydantic import BaseModel
+from readXML import PaperXML
+from text2kg import text2kg_api
 import time
 
 app = FastAPI()
 
 """
 Responses 200
-1. /paper2kg/ & /post_paper2kg
+
 message: success
 time: analysis time for XML file
 data: KG data
@@ -28,6 +29,8 @@ data: KG data
             type: triple type
             section_id: text position
 """
+
+# paper2KG
 
 
 @app.get("/paper2kg/")
@@ -47,17 +50,15 @@ async def paper2kg(paperID: str, confidence: float, fine_grain: bool):
     return {"message": "success", 'time': time.time() - start, 'data': api_data}
 
 
-class PostItem4Text2Kg(BaseModel):
+class PostItem4Paper2Kg(BaseModel):
     paperID: str = None
     confidence: float = None
     fine_grain: bool = None
 
 
 @app.post('/post_paper2kg')
-async def post_paper2kg(request: PostItem4Text2Kg):
+async def post_paper2kg(request: PostItem4Paper2Kg):
     """
-    :param request:
-    :return:
     :example:
     {"paperID": "8.xml", "confidence": 0.1, "fine_grain": "False"}
     """
@@ -67,6 +68,46 @@ async def post_paper2kg(request: PostItem4Text2Kg):
     fine_grain = bool(request.fine_grain)
     paper = PaperXML(paperID)
     api_data = paper.paper2kg_api(confidence=confidence, max_entity_len=4, fine_grain=fine_grain)
+    print(time.time() - start)
+    return {"message": "success", 'time': time.time() - start, 'data': api_data}
+
+
+# text2KG
+
+
+@app.get("/text2kg/")
+async def text2kg(text: str, confidence: float, fine_grain: bool):
+    """
+    :param text: input text
+    :param confidence: confidence for NRE, 0.6 recommended
+    :param fine_grain: grain for NRE, False recommended
+    :return:
+    :example:
+    http://127.0.0.1:8000/text2kg/?text=AceMap%20is%20based%20on%20MAG.&confidence=0.1&fine_grain=true
+    """
+    start = time.time()
+    api_data = text2kg_api(text=text, confidence=confidence, max_entity_len=4, fine_grain=fine_grain)
+    print(time.time() - start)
+    return {"message": "success", 'time': time.time() - start, 'data': api_data}
+
+
+class PostItem4Text2Kg(BaseModel):
+    text: str = None
+    confidence: float = None
+    fine_grain: bool = None
+
+
+@app.post('/post_text2kg')
+async def post_text2kg(request: PostItem4Text2Kg):
+    """
+    :example:
+    {"text": "AceMap is based on MAG.", "confidence": 0.1, "fine_grain": "False"}
+    """
+    start = time.time()
+    text = request.text
+    confidence = float(request.confidence)
+    fine_grain = bool(request.fine_grain)
+    api_data = text2kg_api(text=text, confidence=confidence, max_entity_len=4, fine_grain=fine_grain)
     print(time.time() - start)
     return {"message": "success", 'time': time.time() - start, 'data': api_data}
 
