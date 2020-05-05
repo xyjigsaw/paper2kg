@@ -32,3 +32,5 @@ Once the download is successful, these two lines of code must be removed.
 ```bash
 python paperAPI.py
 ```
+
+- API docs: http://127.0.0.1:8000/docs
