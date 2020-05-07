@@ -32,7 +32,7 @@ No API: Configure readXML.py and run.
 
 or
 ```bash
-uvicorn paperAPI:app --reload --port 8000 --host 0.0.0.0
+uvicorn paperAPI:app --reload --port 8000 --host 127.0.0.1
 ```
 or
 ```bash
