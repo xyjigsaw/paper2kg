@@ -1,5 +1,10 @@
 # pip install fastapi
 # pip install uvicorn
+"""
+from pdf_parser import Parser
+parser = Parser('cermine')
+parser.parse('text', 'acemap.pdf', 'output', 10)
+"""
 
 """
 from fastapi import FastAPI

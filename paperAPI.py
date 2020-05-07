@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from readXML import PaperXML
 from text2kg import text2kg_api
 import time
+from pdf_parser import Parser
 
 app = FastAPI()
 
@@ -41,10 +42,12 @@ async def paper2kg(paperID: str, confidence: float, fine_grain: bool):
     :param fine_grain: grain for NRE, False recommended
     :return:
     :example:
-    http://127.0.0.1:8000/paper2kg?paperID=8.xml&confidence=0.6&fine_grain=false
+    http://127.0.0.1:8000/paper2kg?paperID=ELG.pdf&confidence=0.6&fine_grain=false
     """
     start = time.time()
-    paper = PaperXML(paperID)
+    parser = Parser('cermine')
+    parser.parse('text', paperID, 'output', 50)
+    paper = PaperXML('output/' + paperID[:-3] + 'cermine.xml')
     api_data = paper.paper2kg_api(confidence=confidence, max_entity_len=4, fine_grain=fine_grain)
     print(time.time() - start)
     return {"message": "success", 'time': time.time() - start, 'data': api_data}
@@ -60,13 +63,15 @@ class PostItem4Paper2Kg(BaseModel):
 async def post_paper2kg(request: PostItem4Paper2Kg):
     """
     :example:
-    {"paperID": "8.xml", "confidence": 0.1, "fine_grain": "False"}
+    {"paperID": "ELG.pdf", "confidence": 0.1, "fine_grain": "False"}
     """
     start = time.time()
     paperID = request.paperID
     confidence = float(request.confidence)
     fine_grain = bool(request.fine_grain)
-    paper = PaperXML(paperID)
+    parser = Parser('cermine')
+    parser.parse('text', paperID, 'output', 50)
+    paper = PaperXML('output/' + paperID[:-3] + 'cermine.xml')
     api_data = paper.paper2kg_api(confidence=confidence, max_entity_len=4, fine_grain=fine_grain)
     print(time.time() - start)
     return {"message": "success", 'time': time.time() - start, 'data': api_data}
@@ -115,4 +120,4 @@ async def post_text2kg(request: PostItem4Text2Kg):
 if __name__ == '__main__':
     uvicorn.run(app=app, host="127.0.0.1", port=8000, workers=1)
 
-# uvicorn paperAPI:app --reload
+# uvicorn paperAPI:app --reload --port 7000 --host 127.0.0.1

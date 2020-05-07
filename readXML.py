@@ -9,6 +9,7 @@ from xml.dom.minidom import parse
 import os
 import time
 import nltk
+import re
 
 '''
 nltk.download('punkt')
@@ -39,7 +40,11 @@ class PaperXML:
             if self.paper_year:
                 return self.paper_year
         except AttributeError:
-            return self.data.getElementsByTagName('article-meta')[0].getElementsByTagName('year')[0].childNodes[0].nodeValue
+            try:
+                return self.data.getElementsByTagName('article-meta')[0].getElementsByTagName('year')[0].childNodes[
+                    0].nodeValue
+            except IndexError as e:
+                return '0000'
 
     def get_affiliation(self):
         try:
@@ -121,6 +126,8 @@ class PaperXML:
                 p_text = ''
                 for p in p_ls:
                     p_val = str(p.childNodes[0].nodeValue).replace('\n', ' ').strip()
+                    p_val = re.findall('[a-zA-Z0-9\s+\t\.\!\/_,$%^*(+\"\'\-]+', p_val, re.S)
+                    p_val = "".join(p_val)
                     all_sec_text += p_val + '\n'
                     p_text += p_val + ' '
                 if sec_title == '-':
@@ -256,7 +263,7 @@ class PaperXML:
                         d3js_data.append(tri)
                         try:
                             tri = {'source': triple[0], 'target': self.section_dict[section_id]['sec_title'],
-                                'rela': 'exists in', 'type': 'resolved'}
+                                   'rela': 'exists in', 'type': 'resolved'}
                             d3js_data.append(tri)
                             tri = {'source': triple[2], 'target': self.section_dict[section_id]['sec_title'],
                                    'rela': 'exists in', 'type': 'resolved'}
@@ -269,7 +276,7 @@ class PaperXML:
 
     def paper2kg_api(self, confidence, max_entity_len, fine_grain=True, tags=None):
         if tags is None:
-            tags = ['NNP', 'NNPS']
+            tags = ['NNP', 'NNPS', 'NNS']
         entity_rel = self.section_NRE()
         data4api = {}
         triple_id = 0
@@ -288,6 +295,7 @@ class PaperXML:
             # print(_key)
             candidate_words = []
             for item in nltk.pos_tag(nltk.word_tokenize(_key)):
+                # print(item)
                 if item[1] in tags:
                     candidate_words.append(item[0])
             # print(self.get_sec_id4NER(_key))
@@ -323,7 +331,8 @@ class PaperXML:
                         break
 
                 if len(triple) == 3:
-                    if len(triple[0].split()) <= max_entity_len and len(triple[2].split()) <= max_entity_len:
+                    if len(triple[0].split()) <= max_entity_len and len(triple[2].split()) <= max_entity_len and len(triple[0].split()[0]) >= 2:
+                        # print(triple)
                         section_id = str(self.get_sec_id4NRE(_key))
                         tri = {'source': triple[0], 'target': triple[2], 'rela': triple[1],
                                'confidence': item['confidence'],
@@ -352,7 +361,7 @@ class PaperXML:
 
 if __name__ == '__main__':
     start = time.time()
-    paper = PaperXML('8.xml')
-    # print(paper.get_secs())
+    paper = PaperXML('output/acemap.cermine.xml')
+    # print(paper.get_secs()) output/acemap.cermine
     paper.paper2kg_d3js(confidence=0.6, max_entity_len=4, fine_grain=False)
     print(time.time() - start)

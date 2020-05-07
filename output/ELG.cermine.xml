@@ -1,0 +1,1451 @@
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD v1.0 20120330//EN" "JATS-archivearticle1.dtd">
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <journal-meta />
+    <article-meta>
+      <title-group>
+        <article-title>ELG: An Event Logic Graph</article-title>
+      </title-group>
+      <contrib-group>
+        <contrib contrib-type="author">
+          <string-name>Xiao Ding</string-name>
+          <xref ref-type="aff" rid="aff0">0</xref>
+        </contrib>
+        <contrib contrib-type="author">
+          <string-name>Zhongyang Li</string-name>
+          <xref ref-type="aff" rid="aff0">0</xref>
+        </contrib>
+        <contrib contrib-type="author">
+          <string-name>Ting Liu</string-name>
+          <xref ref-type="aff" rid="aff0">0</xref>
+        </contrib>
+        <contrib contrib-type="author">
+          <string-name>Kuo Liao</string-name>
+          <email>kliaog@ir.hit.edu.cn</email>
+          <xref ref-type="aff" rid="aff0">0</xref>
+        </contrib>
+        <aff id="aff0">
+          <label>0</label>
+          <institution>Research Center for Social Computing and Information Retrieval Harbin Institute of Technology</institution>
+          ,
+          <addr-line>Harbin, 150001</addr-line>
+          ,
+          <country country="CN">China</country>
+        </aff>
+      </contrib-group>
+      <abstract>
+        <p>Corresponding Author</p>
+      </abstract>
+    </article-meta>
+  </front>
+  <body>
+    <sec id="sec-1">
+      <title>-</title>
+      <p>2
+v
+5
+1
+0
+8
+0
+.
+7
+0
+9
+1
+:
+v
+i
+X
+r
+a
+The evolution and development of events
+have their own basic principles, which make
+events happen sequentially. Therefore, the
+discovery of such evolutionary patterns among
+events are of great value for event prediction,
+decision-making and scenario design of
+dialog systems. However, conventional
+knowledge graph mainly focuses on the entities and
+their relations, which neglects the real world
+events. In this paper, we present a novel type
+of knowledge base — Event Logic Graph
+(ELG), which can reveal evolutionary
+patterns and development logics of real world
+events. Specifically, ELG is a directed cyclic
+graph, whose nodes are events, and edges
+stand for the sequential, causal, conditional or
+hypernym-hyponym (“is-a”) relations between
+events. We constructed two domain ELG:
+financial domain ELG, which consists of more
+than 1.5 million of event nodes and more than
+1.8 million of directed edges, and travel
+domain ELG, which consists of about 30
+thousand of event nodes and more than 234
+thousand of directed edges. Experimental results
+show that ELG is effective for the task of script
+event prediction.</p>
+    </sec>
+    <sec id="sec-2">
+      <title>1 Introduction</title>
+      <p>The evolution and development of events have
+their own underlying principles, leading to events
+happen sequentially. For example, the sentence
+“After having lunch, Tom paid the bill and left the
+restaurant” shows a sequence of event evolutions:
+“have lunch”!“pay the bill”!“leave the
+restaurant”. This event sequence is a common pattern
+for the scenario of having lunch in a restaurant.
+Such patterns can reveal the basic rules of event
+evolutions and human behaviors. Hence, it is of
+great value for many Artificial Intelligence (AI)
+applications, such as discourse understanding,
+intention identification and dialog generation.</p>
+      <p>However, traditional knowledge graph takes the
+entity as the research focus, and investigate the
+properties of entities and the relationships
+between entities, which lacks of event-related
+knowledge. In order to discover the evolutionary
+patterns and logics of events, we propose an
+eventcentric knowledge graph — Event Logic Graph
+(ELG) and the framework to construct ELG. ELG
+is a directed cyclic graph, whose nodes are events,
+and edges stand for the sequential (the same
+meaning with “temporal”), causal, conditional
+or hypernym-hyponym (“is-a”) relations between
+events. Essentially, ELG is an event logic
+knowledge base, which can reveal evolutionary patterns
+and development logics of real world events.</p>
+      <p>To construct ELG, the first step is to
+extract events from raw texts, and then
+recognize the sequential, causal, conditional or
+hypernym-hyponym relations between two events
+and distinguish the direction of each sequential or
+causal relation. In the end, we need to merge event
+pairs to obtain the final event logic graph by
+connecting semantically similar events and
+generalizing each specific event.</p>
+      <p>
+        Numerous efforts have been made to extract
+temporal and causal relations from texts. As the
+most commonly used corpus, TimeBank
+        <xref ref-type="bibr" rid="ref18">(Pustejovsky et al., 2003)</xref>
+        has been adopted in many
+temporal relation extraction studies. Mani et
+al. (2006) applied the temporal transitivity rule to
+greatly expand the corpus. Chambers et al., (2007)
+used previously learned event attributes to classify
+the temporal relationship. For causality relation
+extraction, Zhao et al. (2017) extracted multiple
+kinds of features to recognize causal relations
+between two events in the same sentence.
+Radinsky et al. (2012) automatically extracted
+causeeffect pairs from large quantities of news
+headlines by designed causal templates for predicting
+news events. However, most of these studies only
+extract temporal or causal event pairs from single
+sentences, which are discrete knowledge pieces,
+and fail to organize them into a knowledge graph.
+In this paper, we further propose to organize the
+universal event evolutionary principles and
+patterns into a knowledge base based on the extracted
+temporal and causal event pairs.
+      </p>
+      <p>The main contributions of this paper are
+threefold. First, we are among the first to propose the
+definition of ELG. Second, we propose a
+promising framework to construct ELG from a
+largescale unstructured text corpus. Third,
+experimental results show that ELG is capable of
+improving the performances of downstream applications,
+such as script event prediction.
+2</p>
+    </sec>
+    <sec id="sec-3">
+      <title>Event Logic Graph</title>
+      <p>Definition 1. ELG is a directed cyclic graph,
+whose nodes are events, and edges stand
+for the sequential, causal, conditional or
+hypernym-hyponym relations between events.
+Essentially, ELG is an event logic knowledge
+base, which reveals evolutionary patterns and
+development logics of real world events.</p>
+      <p>Figure 1 demonstrates three different event
+logic subgraphs of three different scenarios.
+Concretely, Figure 1 (a) describes a sequence of events
+under the scenario of “plan a wedding”, which
+usually happen in the real world, and have evolved
+into the fixed human behavior patterns. For
+example, “plan a wedding” usually follows by “buy
+a house”, “buy a car” and “plan a travel”. This
+kind of commonsense event evolutionary patterns
+are usually hidden behind human beings’ daily
+activities, or online user generated contents. To the
+best of our knowledge, this kind of commonsense
+knowledge is not explicitly stored in any existing
+knowledge bases, so that, we propose constructing
+an ELG to store it.</p>
+      <p>In ELG, events are represented as abstract,
+generalized and semantic complete event tuples
+E = (S; P; O), where P is the action, S is the
+actor and O is the object on which the action is
+performed. In our definition, each event must
+contain a trigger word (i.e., P ), such as “run”, which
+mainly indicates the type of the event. In different
+application scenarios, S and O can be omitted,
+respectively, such as (watch, a movie) and (climate,
+warming). In general, events and the degree of
+abstraction of an event are closely related to the
+scene in which the event occurred, and a single
+event may become too abstract to understand
+without the context scenario.</p>
+      <p>Abstract and generalized means that we do
+not concern about the exact participants, location
+and time of an event. For example, “who watch
+nounal hypernym–hyponym relation
+verbal hypernym–hyponym relation
+（food price, increase）
+murder
+(vegetables price,
+increase)
+…
+(meat price,
+increase)
+homicide
+…
+suicide
+pri(cceu,ciunmcrbeearse) … (potato price,
+increase)
+(pork price, … (binecerfeparsiec)e,
+increase)
+assassinate … poisoning
+hang oneself … Take poison
+movies” and “watch which movie” are not
+important in ELG. Semantic complete means that
+human beings can understand the meaning of the
+event without ambiguity. For example, (have, a
+hot pot) and (go to, the airport) are reasonable
+event tuples to represent events. While (go,
+somewhere), (do, the things) and (eat) are unreasonable
+or incomplete event representations, as their
+semantics are too vague to be understood.</p>
+      <p>We have four categories of directed
+edges: sequential directed edges, causal
+directed edges, conditional directed edges and
+hypernym-hyponym directed edges, which
+indicate different relationships between events. The
+sequential relation between two events refers to
+their partial temporal orderings. For example,
+given the sentence “After having lunch, Tom paid
+the bill and left the restaurant.” (have, lunch),
+(pay, the bill) and (leave the restaurant) compose
+a sequential event chain.</p>
+      <p>The causal relation is the relation between the
+cause event and the effect event. For example,
+given the sentence “The nuclear leak in Japan
+leads to serious ocean pollution.” (nuclear, leak)
+is the cause event, and (ocean, pollution) is the
+effect event. It is obvious that the causal relation
+must be sequential.</p>
+      <p>The conditional relation is a logical relation in
+which the illocutionary act employing one of a pair
+of propositions is expressed or implied to be true
+or in force if the other proposition is true. For
+example, “study hard” is the condition of “achieve
+good performances”.</p>
+      <p>The hypernym-hyponym relation is a kind of
+“is-a” relationship between events, which includes
+two different types of hypernym-hyponym
+relations: nounal hypernym-hyponym relation and
+verbal hypernym-hyponym relation, as shown in
+Figure 2.</p>
+      <p>ELG is different from traditional Knowledge
+Graph in many aspects. As shown in Table 1, ELG
+focuses on events, and the directed edges between
+event nodes stand for the sequential, causal or
+hypernym-hyponym relations between them. The
+sequential and causal relations in ELG are
+probabilistic. In contrast, traditional Knowledge Graph
+focuses on entities, and its edges stand for the
+attributes of entities or relations between them.
+There are usually thousands of types of relations
+between entities. Moreover, the attributes and
+relations in Knowledge Graph are mostly
+deterministic.
+3</p>
+    </sec>
+    <sec id="sec-4">
+      <title>Architecture</title>
+      <p>As illustrated in Figure 3, we propose a
+framework to construct an ELG from large-scale
+unstructured texts, including data cleaning, natural
+language processing, event extraction, sequential
+relation and direction classification, causality
+extraction and transition probability computation.</p>
+      <p>After cleaning the data, a series of natural
+language processing steps including segmentation,
+part-of-speech tagging, and dependency parsing
+are conducted for event extraction. Tools provided
+Raw
+Corpus</p>
+      <p>Framework for Constructing ELG
+Data Cleaning</p>
+      <p>Event Extraction</p>
+      <p>
+        NLP Processing
+by Language Technology Platform (LTP)
+        <xref ref-type="bibr" rid="ref3">(Che
+et al., 2010)</xref>
+        are used for this preprocessing.
+      </p>
+      <sec id="sec-4-1">
+        <title>3.1 Open Event Extraction</title>
+        <p>
+          We extract structured events from free text
+using Open IE technology and dependency
+parsing. Given a sentence obtained from texts, we
+first adopt the event extraction methods described
+in
+          <xref ref-type="bibr" rid="ref5">(Ding et al., 2013)</xref>
+          to extract the candidate
+tuples of the event (S; P; O; X), and then parse the
+sentence with LTP
+          <xref ref-type="bibr" rid="ref3">(Che et al., 2010)</xref>
+          to extract the
+subject, object and predicate.
+        </p>
+        <p>We filter out the low-frequency event tuples by
+a proper threshold, to exclude the event tuples
+extracted due to segmentation and dependency
+parsing errors. Some too general events such as “go
+somewhere” and “do something” are removed by
+regular expressions with a dictionary.</p>
+      </sec>
+      <sec id="sec-4-2">
+        <title>3.2 Sequential Relation and Direction</title>
+      </sec>
+      <sec id="sec-4-3">
+        <title>Recognition</title>
+        <p>Given an event pair candidate (A, B), sequential
+relation recognition is to judge whether it has a
+sequential relation or not. For the ones having
+sequential relations, direction recognition should be
+conducted to distinguish the direction. For
+example, we need to recognize that there is a directed
+edge from (buy, tickets) to (watch, a movie). We
+regard the sequential relation and direction
+recognition as two separate binary classification tasks.</p>
+        <p>As shown in Table 2, multiple kinds of features
+are extracted for these two supervised
+classification tasks. Details about the intuition why we
+choose these features are described below:</p>
+      </sec>
+      <sec id="sec-4-4">
+        <title>Frequency-based Features: For a candidate</title>
+        <sec id="sec-4-4-1">
+          <title>Frequency-based Features Ratio-based Features</title>
+          <p>T1: count of (A, B) R1: T2/T1
+T2: count of (A, B) where A oc- R2: T1/T4
+curs before B R3: T1/T5
+T3: count of (A, B) where B oc- R4: T1/T6
+curs before A R5: T1/T7
+T4: count of A R6: T1/T8
+T5: count of B R7: T1/T9
+T6: count of verb-A R8: T6/T4
+T7: count of object-A R9: T7/T4
+T8: count of verb-B R10: T8/T5
+T9: count of object-B R11: T9/T5</p>
+        </sec>
+        <sec id="sec-4-4-2">
+          <title>Context-based Features PMI-based Features</title>
+          <p>C1: the number of contexts in A1: PMI of verb-A
+which A and B co-occur and verb-B
+C2: average length of C1 A2: PMI of A and B
+C3: word embeddings of con- A3: PMI of verb-A
+texts in which A and B co-occur and object-B
+C4: the postag of contexts in A4: PMI of object-A
+which A and B co-occur and verb-B
+C5: phrase embeddings of A A5: PMI of object-A
+and B and object-B</p>
+          <p>event pair (A, B), the frequency-based features
+include their co-occur frequency (T1 to T3),
+respective frequency of A and B in the whole
+corpus (T4 and T5), and respective frequency of
+each event argument (T6 to T9).</p>
+        </sec>
+      </sec>
+      <sec id="sec-4-5">
+        <title>Ratio-based Features: Some meaningful com</title>
+        <p>binations between frequency-based features
+may provide extra information that is useful for
+sequential relation and direction classification,
+shown in Table 2 (R1 to R11).</p>
+      </sec>
+      <sec id="sec-4-6">
+        <title>Context-based Features: We believe that the</title>
+        <p>contexts of event A and B are important features
+for identifying their sequential relation. We
+devise context-based features that capture the
+contextual semantic information of A and B, shown
+in Table 2 (C1 to C5).</p>
+        <p>PMI-based Features: We also investigate the
+pointwise mutual information (PMI) between
+event A and B, shown in Table 2 (A1 to A5).</p>
+      </sec>
+      <sec id="sec-4-7">
+        <title>Transition Probability Computation Given an</title>
+        <p>event pair (A, B), we use the following equation
+to approximate the transition probability from the
+event A to the event B:</p>
+        <p>P (BjA) =
+f (A; B)
+f (A)
+;
+(1)
+where f (A; B) is the co-occurrence frequency of
+event pair (A, B), and f (A) is the frequency of
+event A in the whole corpus.</p>
+        <p>O</p>
+        <p>B-cause
+CRF
+BiLSTM</p>
+        <p>C</p>
+        <p>T1</p>
+        <p>T2
+E[CLS]</p>
+        <p>E1</p>
+        <p>E2
+[CLS] Tok 1 Tok 2
+（a）
+（b）</p>
+        <p>A
+A
+A
+A’</p>
+        <p>B
+C
+B
+C
+…
+…
+…
+…
+…
+…
+…
+A
+A
+A’
+…</p>
+        <p>B
+C
+B
+C</p>
+        <p>O
+TN
+EN
+Tok N
+3.3.1</p>
+      </sec>
+      <sec id="sec-4-8">
+        <title>Unsupervised Causality Extraction</title>
+        <p>
+          The first step to construct causal relation ELG is to
+identify cause-effect pairs from unstructured
+natural language texts. As the amount of data is
+extremely large (millions of documents),
+obtaining human-annotated pairs is impossible. We find
+that causal relations expressed in text have various
+forms. We therefore provide a procedure similar to
+our previous work
+          <xref ref-type="bibr" rid="ref22">(Zhao et al., 2017)</xref>
+          , which can
+automatically identify mentions of causal events
+from natural language texts.
+        </p>
+        <p>We construct a set of rules to extract mentions
+of causal events. Each rule follows the template
+of &lt;Pattern, Constraint, Priority&gt;, where
+Pattern is a regular expression containing a selected
+connector, Constraint is a syntactic constraint on
+sentences to which the pattern can be applied, and
+Priority is the priority of the rule if several rules
+are matched. For example, we use the pattern
+“[cause] leads to [effect]” to extract the causal
+relation between two events.
+3.3.2</p>
+      </sec>
+      <sec id="sec-4-9">
+        <title>Supervised Causality Extraction</title>
+        <p>
+          As illustrated in Figure 4, we also use Bert and
+BiLSTM+CRF model to extract causal relations.
+Language model pre-training has shown to be very
+effective for learning universal language
+representations by leveraging large amounts of unlabeled
+data. Some of the most prominent models are
+ELMo
+          <xref ref-type="bibr" rid="ref14">(Peters et al., 2018)</xref>
+          , GPT (Rad), and BERT
+          <xref ref-type="bibr" rid="ref4">(Devlin et al., 2019)</xref>
+          . BERT uses the bidirectional
+transformer architecture. There are two existing
+strategies for applying pre-trained language
+models to downstream tasks: feature-based and
+finetuning.
+        </p>
+        <p>In this paper, we annotate each token in a
+sentence with following tags: B-cause, I-cause,
+Beffect, I-effect and O. The tag “B-cause” refers to
+the beginning token of the cause event and each
+rest token in the cause event is represented by
+“Icause”. The tag “O” refers to the normal token
+which is irrelevant with causality. We feed the
+hidden representation Ti for each token i as the input
+layer of BiLSTM. These hidden representations Ti
+can be viewed as semantic features learnt from
+Bert model. The output representation layer of
+BiLSTM is then fed into the classification layer to
+predict the causal tags. The predictions in the
+classification layer are conditioned on the surrounding
+predictions by using the CRF method.</p>
+        <p>
+          BERT
+Given large amount of event pairs extracted in
+previous steps, we need to connect event pairs to form
+a graph structure. Intuitively, as shown in
+Figure 5 (a), if we can find the same event in two event
+pairs, it is easy to form the graph structure.
+However, as the extracted events are discretely
+represented by bag-of-words, we can hardly find two
+identical events. Hence, as shown in Figure 5 (b),
+we propose to find the semantically similar events
+(A and A’) and connect them. To this end, we
+propose learning distributed representations for each
+event, and utilize the cosine similarity to measure
+the semantic similarity between two event vectors.
+We use the framework of neural tensor networks to
+learn event embeddings, as described in our
+previous work
+          <xref ref-type="bibr" rid="ref6">(Ding et al., 2015)</xref>
+          .
+3.5
+        </p>
+      </sec>
+      <sec id="sec-4-10">
+        <title>Application of the ELG</title>
+        <p>
+          We investigate the application of the ELG on the
+task of script event prediction
+          <xref ref-type="bibr" rid="ref9">(Li et al., 2018)</xref>
+          .
+Figure 6 (a) gives an example to motive our idea
+of using ELG. Given an event context A(enter),
+B(order), C(serve), we need to choose the most
+reasonable subsequent event from the candidate
+list D(eat) and E(talk), where D(eat) is the correct
+answer and E(talk) is a randomly selected
+candidate event that occurs frequently in various
+scenarios. Pair-based and chain-based models trained on
+event chains datasets (as shown in Figure 6 (b)) are
+very likely to choose the wrong answer E, as the
+training data shows that C and E have a stronger
+relation than C and D. As shown in Figure 6 (c),
+by constructing an ELG based on training events,
+context events B, C and the candidate event D
+compose a strongly connected component, which
+indicates that D is a more reasonable subsequent
+event, given context events A, B, C.
+        </p>
+        <p>
+          Based on the ELG and our proposed scaled
+graph neural network (SGNN), we achieved the
+state-of-the-art performance of script event
+prediction in the work of
+          <xref ref-type="bibr" rid="ref9">(Li et al., 2018)</xref>
+          . We can also
+incorporate ELG into dialog systems to ensure that
+the auto-reply answers are more logical.
+        </p>
+        <p>Moreover, we constructed a financial ELG,
+which consists of more than 1.5 million of event
+nodes and 1.8 million of directed edges.
+Figure 7 shows a screenshot of the online financial
+ELG (http://elg.8wss.com/). The user can enter
+any financial event in the search box, such as
+“inflation”. Our demo can generate an event logic
+graph with “inflation” as the initial node. The
+red node in Figure 7 is the input event; the
+yellow nodes are evolutionary nodes according to the
+input event, and the green nodes are semantically
+similar events with yellow nodes. We also give the
+extracted cause event, effect event and contexts in
+the right column to help users better understand
+the graph. Based on this financial ELG and the
+current events, we can infer what events will
+happen in the future.
+4</p>
+      </sec>
+    </sec>
+    <sec id="sec-5">
+      <title>Experiments</title>
+      <p>In this section, we conduct three kinds of
+experiments. First, we recognize whether two events
+has a sequential relation and its direction. Second,
+we extract casual relations between events based
+on our proposed unsupervised and supervised
+approaches. Finally, we use the downstream task:
+script event prediction to show the effectiveness
+of ELG.
+4.1</p>
+      <sec id="sec-5-1">
+        <title>Dataset Description</title>
+        <p>We annotated 2,173 event pairs with high
+cooccurrence frequency ( 5) from the dataset.
+Each event pair (A, B) is ordered that A occurs
+before B with a higher frequency than B occurs
+before A. In the annotation process, the annotators
+are provided with the event pairs and their
+corresponding contexts. They need to judge whether
+there is a sequential relation between two events
+from a commonsense perspective. If true, they
+also need to give the sequential direction. For
+example, “watch movies” and “listen to music” are
+tagged as no sequential relation (negative), while
+“go to the railway station” and “by tickets” are
+tagged as having a sequential relation (positive),
+and the sequential direction is from the former to
+the latter (positive). The detailed statistics of our
+dataset are listed in Table 3. The positive and
+negative examples are very imbalanced. So we over
+sample the negative examples in training set to
+ensure the number of positive and negative training
+examples are equal.</p>
+        <p>For causal relation experiment, we crawled
+1,362,345 Chinese financial news documents from
+online websites, such as Tencent1 and Netease2.
+All the headlines and main contents are exploited
+as the experiment corpus. We manually annotated
+1,000 sentences to evaluate the causality
+extraction performance.</p>
+        <p>
+          Script event prediction
+          <xref ref-type="bibr" rid="ref1 ref2">(Chambers and Jurafsky,
+2008a)</xref>
+          is a challenging event-based commonsense
+reasoning task, which is defined as giving an
+existing event context, one needs to choose the most
+reasonable subsequent event from a candidate list.
+Following Wang et al. (2017), we evaluate on the
+standard multiple choice narrative cloze (MCNC)
+dataset
+          <xref ref-type="bibr" rid="ref17 ref7">(Granroth-Wilding and Clark, 2016)</xref>
+          .
+4.2
+4.2.1
+        </p>
+      </sec>
+      <sec id="sec-5-2">
+        <title>Baselines and Evaluation Metrics</title>
+      </sec>
+      <sec id="sec-5-3">
+        <title>Sequential Relation</title>
+        <p>For sequential relation recognition, PMI score of
+an event pair is used as the baseline method. For
+sequential direction recognition, if event A occurs
+before B with a higher frequency than B occurs
+before A, we regard the sequential direction as from
+event A to event B. This is called the Preceding
+Assumption, which is used as the baseline method
+for sequential direction recognition.</p>
+        <p>For sequential relation and direction
+recognition, four classifiers are used for these
+classification tasks, which are naive Bayes classifier (NB),
+logistic regression (LR), multiple layer perceptron
+(MLP) and support vector machines (SVM). We
+explored different feature combinations to find the
+best feature set for both classification tasks. All
+experiments are conducted using five-fold cross
+validation. The final experiment result is the
+average performance of ten times of implementations.</p>
+        <p>Two kinds of evaluation metrics are used to
+evaluate the performance of our proposed
+methods: accuracy and F1 metric.</p>
+        <p>1http://finance.qq.com/
+2http://money.163.com/
+4.2.2
+For causal relation mining, we mainly conduct
+experiments to evaluate the causality extraction
+system. The same evaluation metrics as in sequential
+relation experiment are used to evaluate the
+performance of causality extraction. We mainly
+compare unsupervised rule-based causality extraction
+approach with supervised bert-based causality
+extraction approach.
+4.2.3</p>
+      </sec>
+      <sec id="sec-5-4">
+        <title>Script Event Prediction</title>
+        <p>
+          We compare our model with the following
+baseline methods, and follow previous work
+          <xref ref-type="bibr" rid="ref21 ref22">(Wang
+et al., 2017)</xref>
+          using the accuracy as the evaluation
+metric.
+        </p>
+        <p>
+          PMI
+          <xref ref-type="bibr" rid="ref1 ref2">(Chambers and Jurafsky, 2008a)</xref>
+          is
+the co-occurrence-based model that calculates
+predicate-GR event pairs relations based on
+Pairwise Mutual Information.
+        </p>
+        <p>
+          Bigram
+          <xref ref-type="bibr" rid="ref8">(Jans et al., 2012)</xref>
+          is the counting-based
+skip-grams model that calculates event pair
+relations based on bigram probabilities.
+        </p>
+        <p>
+          Word2vec
+          <xref ref-type="bibr" rid="ref11">(Mikolov et al., 2013)</xref>
+          is the widely
+used model that learns word embeddings from
+large-scale text corpora. The learned
+embeddings for verbs and arguments are used to
+compute pairwise event relatedness scores.
+        </p>
+        <p>
+          DeepWalk
+          <xref ref-type="bibr" rid="ref13">(Perozzi et al., 2014)</xref>
+          is the
+unsupervised model that extends the word2vec
+algorithm to learn embeddings for networks.
+EventComp
+          <xref ref-type="bibr" rid="ref17 ref7">(Granroth-Wilding and Clark,
+2016)</xref>
+          is the neural network model that
+simultaneously learns embeddings for the event verb
+and arguments, a function to compose the
+embeddings into a representation of the event, and
+a coherence function to predict the strength of
+association between two events.
+        </p>
+        <p>
+          PairLSTM
+          <xref ref-type="bibr" rid="ref21 ref22">(Wang et al., 2017)</xref>
+          is the model that
+integrates event order information and pairwise
+event relations together by calculating pairwise
+event relatedness scores using the LSTM hidden
+states as event representations.
+        </p>
+      </sec>
+      <sec id="sec-5-5">
+        <title>Results and Analysis 4.3 4.3.1</title>
+      </sec>
+      <sec id="sec-5-6">
+        <title>Sequential Relation Identification</title>
+        <p>Table 4 shows the experimental results for
+sequential relation classification, from which we find that
+the simple PMI baseline can achieve a good
+performance. Indeed, due to the imbalance of positive
+and negative test examples, PMI baseline chooses
+a threshold to classify all test examples as positive,
+and get a recall of 1. Four different classifiers
+using all the features in Table 2 achieve poor results,
+and only the NB classifier achieves higher
+performance than the baseline method. We explored all
+combinations of four kinds of features to find the
+best feature set for each classifier. The NB
+classifier achieves the best performance with the
+accuracy of 77.6% and the F1 score of 85.7% .</p>
+        <p>Table 5 shows the experimental results for
+sequential direction classification, from which we
+find that the Preceding Assumption is a very
+strong baseline for direction classification, and
+achieves an accuracy of 86.1% and a F1 score of
+92.5%. Four classifiers with all features in Table 2
+achieve poor results, and only the SVM achieves
+higher performance than the baseline method. We
+explored all combinations of four kinds of
+features, to find the best feature set for different
+classifiers. Still, the SVM classifier achieves the best
+performance with an accuracy of 87.0% and a F1
+score of 92.9%, using the association and context
+based features.</p>
+      </sec>
+      <sec id="sec-5-7">
+        <title>4.3.2 Causal Relation Extraction</title>
+        <p>Table 6 shows the experimental results for causal
+relation extraction, from which we find Bert-based
+approach dramatically outperforms rule-based
+approach. This is mainly because the BERT model
+can obtain general language knowledge from
+pretraining, and then our annotated data can be used
+to fine-tune the model to extract the causal
+relation. Rule-based approach can achieve better
+precision score but worse recall score, because
+manually constructed rules can hardly cover the whole
+linguistic phenomenons.</p>
+      </sec>
+      <sec id="sec-5-8">
+        <title>4.3.3 Script Event Prediction</title>
+        <p>Experimental results are shown in Table 7, from
+which we can make the following observations.</p>
+        <p>(1) Word2vec, DeepWalk and other neural
+network-based models (EventComp, PairLSTM,
+SGNN) achieve significantly better results than
+the counting-based PMI and Bigram models. The
+main reason is that learning low dimensional
+dense embeddings for events is more effective than
+sparse feature representations for script event
+prediction.</p>
+        <p>(2) Comparison between “Word2vec” and
+“DeepWalk”, and between “EventComp,
+PairLSTM” and “SGNN” show that graph-based
+models achieve better performance than pair-based and
+chain-based models. This confirms our
+assumption that the event graph structure is more effective
+than event pairs and chains, and can provide more
+abundant event interactions information for script
+event prediction.</p>
+        <p>(3) Comparison between “SGNN-attention”
+and “SGNN” shows the attention mechanism can
+effectively improve the performance of SGNN.
+This indicates that different context events have
+different significance for choosing the correct
+subsequent event.</p>
+        <p>(4) SGNN achieves the best script event
+prediction performance of 52.45%, which is 3.2%
+improvement over the best baseline model
+(PairLSTM).</p>
+        <p>We also experimented with combinations of
+different models, to observe whether different
+models have complementary effects to each other. We
+find that SGNN+EventComp boosts the SGNN
+performance from 52.45% to 54.15%. This shows
+that they can benefit from each other.
+Nevertheless, SGNN+PairLSTM can only boost the SGNN
+performance from 52.45% to 52.71%. This is
+because the difference between SGNN and
+PairLSTM is not significant, which shows that they
+may learn similar event representations but SGNN
+learns in a better way. The combination of SGNN,
+EventComp and PairLSTM achieves the best
+performance of 54.93%. This is mainly because pair
+structure, chain structure and graph structure each
+has its own advantages and they can complement
+each other.</p>
+        <p>The learning curve (accuracy with time) of
+SGNN and PairLSTM is shown in Figure 8. We
+find that SGNN quickly reaches a stable high
+accuracy, and outperforms PairLSTM from start to
+the end. This demonstrates the advantages of
+SGNN over PairLSTM model.
+5</p>
+      </sec>
+    </sec>
+    <sec id="sec-6">
+      <title>Related Work</title>
+      <p>
+        The most relevant research area with ELG is script
+learning. The use of scripts in AI dates back to the
+1970s
+        <xref ref-type="bibr" rid="ref12 ref20">(Schank and Abelson, 1977; Mooney and
+DeJong, 1985)</xref>
+        . In this study, scripts are an
+influential early encoding of situation-specific world
+event. In recent years, a growing body of research
+has investigated statistical script learning.
+Chambers et al., (2008b) proposed unsupervised
+inducAll Features
+Ratio+Association
+Ratio
+Association
+Ratio
+tion of narrative event chains from raw newswire
+text, with narrative cloze as the evaluation metric.
+Jans et al., (2012) used bigram model to
+explic55
+50
+)
+%
+(
+y
+c
+ra45
+u
+c
+c
+A
+40
+350
+SGNN
+      </p>
+      <p>PairLSTM
+800</p>
+      <p>
+        Time (s)
+200
+400
+600
+itly model the temporal order of event pairs.
+However, they all utilized a very simple representation
+of event as the form of (verb, dependency). To
+overcome the drawback of this event
+representation, Pichotta and Mooney
+        <xref ref-type="bibr" rid="ref13 ref15">(Pichotta and Mooney,
+2014)</xref>
+        presented an approach that employed events
+with multiple arguments.
+      </p>
+      <p>
+        There have been a number of recent
+neumodels for script learning. Pichotta
+and Mooney (2016) showed that LSTM-based
+event sequence model outperformed previous
+cooccurrence-based methods for event prediction.
+        <xref ref-type="bibr" rid="ref7">Mark and Clark (2016)</xref>
+        described a feedforward
+neural network which composed verbs and
+arguments into low-dimensional vectors, evaluating on
+a multiple-choice version of the Narrative Cloze
+task. Wang et al.,(2017) integrated event order
+information and pairwise event relations together by
+calculating pairwise event relatedness scores using
+the LSTM hidden states as event representations.
+      </p>
+      <p>Script learning is similar to ELG in concepts.
+However, script learning usually extracts event
+chains without considering their temporal orders
+and causal relations. ELG aims to organize event
+evolutionary patterns into a commonsense
+knowledge base, which is the biggest difference with
+script learning.
+6</p>
+    </sec>
+    <sec id="sec-7">
+      <title>Conclusion</title>
+      <p>In this paper, we present an Event Logic Graph
+(ELG), which can reveal the evolutionary patterns
+and development logics of real world events. We
+also propose a framework to construct ELG from
+large-scale unstructured texts, and use the ELG to
+improve the performance of script event
+prediction. All techniques used in the ELG are
+languageindependent. Hence, we can easily construct other
+language versions of ELG.</p>
+    </sec>
+    <sec id="sec-8">
+      <title>Acknowledgments</title>
+      <p>This work is supported by the National Key
+Basic Research Program of China via grant
+2014CB340503 and the National Natural Science
+Foundation of China (NSFC) via grants 61472107
+and 61702137. The authors would like to thank
+the anonymous reviewers.</p>
+    </sec>
+  </body>
+  <back>
+    <ref-list>
+      <ref id="ref1">
+        <mixed-citation>
+          <string-name>
+            <given-names>Nathanael</given-names>
+            <surname>Chambers</surname>
+          </string-name>
+          and
+          <string-name>
+            <given-names>Dan</given-names>
+            <surname>Jurafsky</surname>
+          </string-name>
+          . 2008a.
+          <article-title>Unsupervised learning of narrative event chains</article-title>
+          .
+          <source>In Proceedings of ACL-08: HLT</source>
+          , pages
+          <fpage>789</fpage>
+          -
+          <lpage>797</lpage>
+          . Association for Computational Linguistics.
+        </mixed-citation>
+      </ref>
+      <ref id="ref2">
+        <mixed-citation>
+          <string-name>
+            <given-names>Nathanael</given-names>
+            <surname>Chambers</surname>
+          </string-name>
+          and
+          <string-name>
+            <given-names>Daniel</given-names>
+            <surname>Jurafsky</surname>
+          </string-name>
+          . 2008b.
+          <article-title>Unsupervised learning of narrative event chains</article-title>
+          .
+          <source>In ACL</source>
+          , volume
+          <volume>94305</volume>
+          , pages
+          <fpage>789</fpage>
+          -
+          <lpage>797</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref3">
+        <mixed-citation>
+          <string-name>
+            <given-names>Wanxiang</given-names>
+            <surname>Che</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Zhenghua</given-names>
+            <surname>Li</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>and Ting</given-names>
+            <surname>Liu</surname>
+          </string-name>
+          .
+          <year>2010</year>
+          .
+          <article-title>Ltp: A chinese language technology platform</article-title>
+          .
+          <source>In ICCL</source>
+          , pages
+          <fpage>13</fpage>
+          -
+          <lpage>16</lpage>
+          . Association for Computational Linguistics.
+        </mixed-citation>
+      </ref>
+      <ref id="ref4">
+        <mixed-citation>
+          <string-name>
+            <given-names>Jacob</given-names>
+            <surname>Devlin</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Mingwei</given-names>
+            <surname>Chang</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Kenton</given-names>
+            <surname>Lee</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>and Kristina</given-names>
+            <surname>Toutanova</surname>
+          </string-name>
+          .
+          <year>2019</year>
+          .
+          <article-title>Bert: Pre-training of deep bidirectional transformers for language understanding. north american chapter of the association for computational linguistics</article-title>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref5">
+        <mixed-citation>
+          <string-name>
+            <given-names>Xiao</given-names>
+            <surname>Ding</surname>
+          </string-name>
+          , Bing Qin, and Ting Liu.
+          <year>2013</year>
+          .
+          <article-title>Building chinese event type paradigm based on trigger clustering</article-title>
+          . pages
+          <fpage>311</fpage>
+          -
+          <lpage>319</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref6">
+        <mixed-citation>
+          <string-name>
+            <given-names>Xiao</given-names>
+            <surname>Ding</surname>
+          </string-name>
+          , Yue Zhang, Ting Liu, and
+          <string-name>
+            <given-names>Junwen</given-names>
+            <surname>Duan</surname>
+          </string-name>
+          .
+          <year>2015</year>
+          .
+          <article-title>Deep learning for event-driven stock prediction</article-title>
+          . pages
+          <fpage>2327</fpage>
+          -
+          <lpage>2333</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref7">
+        <mixed-citation>
+          <string-name>
+            <given-names>Mark</given-names>
+            <surname>Granroth-Wilding</surname>
+          </string-name>
+          and
+          <string-name>
+            <given-names>Stephen</given-names>
+            <surname>Clark</surname>
+          </string-name>
+          .
+          <year>2016</year>
+          .
+          <article-title>What happens next? event prediction using a compositional neural network model</article-title>
+          .
+          <source>In AAAI.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref8">
+        <mixed-citation>
+          <string-name>
+            <given-names>Bram</given-names>
+            <surname>Jans</surname>
+          </string-name>
+          , Steven Bethard, Ivan Vulic´, and Marie Francine Moens.
+          <year>2012</year>
+          .
+          <article-title>Skip n-grams and ranking functions for predicting script events</article-title>
+          .
+          <source>In EACL.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref9">
+        <mixed-citation>
+          <string-name>
+            <given-names>Zhongyang</given-names>
+            <surname>Li</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Xiao</given-names>
+            <surname>Ding</surname>
+          </string-name>
+          , and Ting Liu.
+          <year>2018</year>
+          .
+          <article-title>Constructing narrative event evolutionary graph for script event prediction</article-title>
+          .
+          <source>international joint conference on artificial intelligence</source>
+          , pages
+          <fpage>4201</fpage>
+          -
+          <lpage>4207</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref10">
+        <mixed-citation>
+          <string-name>
+            <given-names>Inderjeet</given-names>
+            <surname>Mani</surname>
+          </string-name>
+          , Marc Verhagen, Ben Wellner, Chong Min Lee,
+          <string-name>
+            <given-names>and James</given-names>
+            <surname>Pustejovsky</surname>
+          </string-name>
+          .
+          <year>2006</year>
+          .
+          <article-title>Machine learning of temporal relations</article-title>
+          .
+          <source>In ICCL and ACL</source>
+          , pages
+          <fpage>753</fpage>
+          -
+          <lpage>760</lpage>
+          . ACL.
+        </mixed-citation>
+      </ref>
+      <ref id="ref11">
+        <mixed-citation>
+          <string-name>
+            <given-names>Tomas</given-names>
+            <surname>Mikolov</surname>
+          </string-name>
+          , Ilya Sutskever, Kai Chen, Greg S Corrado, and
+          <string-name>
+            <given-names>Jeff</given-names>
+            <surname>Dean</surname>
+          </string-name>
+          .
+          <year>2013</year>
+          .
+          <article-title>Distributed representations of words and phrases and their compositionality</article-title>
+          .
+          <source>In NIPS</source>
+          , pages
+          <fpage>3111</fpage>
+          -
+          <lpage>3119</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref12">
+        <mixed-citation>
+          <string-name>
+            <given-names>Raymond</given-names>
+            <surname>Mooney and Gerald DeJong</surname>
+          </string-name>
+          .
+          <year>1985</year>
+          .
+          <article-title>Learning schemata for natural language processing</article-title>
+          . Urbana,
+          <volume>51</volume>
+          :
+          <fpage>61801</fpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref13">
+        <mixed-citation>
+          <string-name>
+            <given-names>Bryan</given-names>
+            <surname>Perozzi</surname>
+          </string-name>
+          , Rami Alrfou, and
+          <string-name>
+            <given-names>Steven</given-names>
+            <surname>Skiena</surname>
+          </string-name>
+          .
+          <year>2014</year>
+          .
+          <article-title>Deepwalk: online learning of social representations</article-title>
+          .
+          <source>KDD</source>
+          ,
+          <year>2014</year>
+          :
+          <fpage>701</fpage>
+          -
+          <lpage>710</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref14">
+        <mixed-citation>
+          <string-name>
+            <surname>Matthew E Peters</surname>
+          </string-name>
+          , Mark Neumann, Mohit Iyyer, Matt Gardner, Christopher G Clark,
+          <article-title>Kenton Lee, and Luke S Zettlemoyer</article-title>
+          .
+          <year>2018</year>
+          .
+          <article-title>Deep contextualized word representations. north american chapter of the association for computational linguistics</article-title>
+          ,
+          <volume>1</volume>
+          :
+          <fpage>2227</fpage>
+          -
+          <lpage>2237</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref15">
+        <mixed-citation>
+          <string-name>
+            <given-names>Karl</given-names>
+            <surname>Pichotta and Raymond J Mooney</surname>
+          </string-name>
+          .
+          <year>2014</year>
+          .
+          <article-title>Statistical script learning with multi-argument events</article-title>
+          .
+          <source>In EACL</source>
+          , volume
+          <volume>14</volume>
+          , pages
+          <fpage>220</fpage>
+          -
+          <lpage>229</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref16">
+        <mixed-citation>
+          <string-name>
+            <given-names>Nathanael</given-names>
+            <surname>Chambers</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Shan</given-names>
+            <surname>Wang</surname>
+          </string-name>
+          , and
+          <string-name>
+            <given-names>Dan</given-names>
+            <surname>Jurafsky</surname>
+          </string-name>
+          .
+          <year>2007</year>
+          .
+          <article-title>Classifying temporal relations between events</article-title>
+          .
+          <source>In ACL</source>
+          , pages
+          <fpage>173</fpage>
+          -
+          <lpage>176</lpage>
+          . ACL.
+        </mixed-citation>
+      </ref>
+      <ref id="ref17">
+        <mixed-citation>
+          <string-name>
+            <given-names>Karl</given-names>
+            <surname>Pichotta and Raymond J Mooney</surname>
+          </string-name>
+          .
+          <year>2016</year>
+          .
+          <article-title>Learning statistical scripts with lstm recurrent neural networks</article-title>
+          . pages
+          <fpage>2800</fpage>
+          -
+          <lpage>2806</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref18">
+        <mixed-citation>
+          <string-name>
+            <given-names>James</given-names>
+            <surname>Pustejovsky</surname>
+          </string-name>
+          , Patrick Hanks, Roser Sauri, Andrew See, Robert Gaizauskas, Andrea Setzer, Dragomir Radev, Beth Sundheim, David Day,
+          <string-name>
+            <given-names>Lisa</given-names>
+            <surname>Ferro</surname>
+          </string-name>
+          , et al.
+          <year>2003</year>
+          .
+          <article-title>The timebank corpus</article-title>
+          .
+          <source>In Corpus linguistics</source>
+          , volume
+          <year>2003</year>
+          , page 40.
+          <string-name>
+            <surname>Lancaster</surname>
+          </string-name>
+          , UK.
+        </mixed-citation>
+      </ref>
+      <ref id="ref19">
+        <mixed-citation>
+          <string-name>
+            <given-names>Kira</given-names>
+            <surname>Radinsky</surname>
+          </string-name>
+          , Sagie Davidovich, and
+          <string-name>
+            <given-names>Shaul</given-names>
+            <surname>Markovitch</surname>
+          </string-name>
+          .
+          <year>2012</year>
+          .
+          <article-title>Learning causality for news events prediction</article-title>
+          .
+          <source>In WWW</source>
+          , pages
+          <fpage>909</fpage>
+          -
+          <lpage>918</lpage>
+          . ACM.
+        </mixed-citation>
+      </ref>
+      <ref id="ref20">
+        <mixed-citation>
+          <string-name>
+            <surname>Roger C Schank and Robert P Abelson</surname>
+          </string-name>
+          .
+          <year>1977</year>
+          .
+          <article-title>Scripts, plans, goals, and understanding: An inquiry into human knowledge structures.</article-title>
+        </mixed-citation>
+      </ref>
+      <ref id="ref21">
+        <mixed-citation>
+          <string-name>
+            <given-names>Zhongqing</given-names>
+            <surname>Wang</surname>
+          </string-name>
+          , Yue Zhang, and
+          <string-name>
+            <given-names>Chingyun</given-names>
+            <surname>Chang</surname>
+          </string-name>
+          .
+          <year>2017</year>
+          .
+          <article-title>Integrating order information and event relation for script event prediction</article-title>
+          . pages
+          <fpage>57</fpage>
+          -
+          <lpage>67</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref22">
+        <mixed-citation>
+          <string-name>
+            <given-names>Sendong</given-names>
+            <surname>Zhao</surname>
+          </string-name>
+          ,
+          <string-name>
+            <surname>Quan</surname>
+            <given-names>Wang</given-names>
+          </string-name>
+          , Sean Massung, Bing Qin, Ting Liu,
+          <string-name>
+            <given-names>Bin</given-names>
+            <surname>Wang</surname>
+          </string-name>
+          , and
+          <string-name>
+            <given-names>ChengXiang</given-names>
+            <surname>Zhai</surname>
+          </string-name>
+          .
+          <year>2017</year>
+          .
+          <article-title>Constructing and embedding abstract event causality networks from text snippets</article-title>
+          .
+          <source>In WSDM</source>
+          , pages
+          <fpage>335</fpage>
+          -
+          <lpage>344</lpage>
+          . ACM.
+        </mixed-citation>
+      </ref>
+    </ref-list>
+  </back>
+</article>

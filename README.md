@@ -6,12 +6,12 @@ Generate Knowledge Graph for Paper
 
 ## Files
 
-- 8.xml: paper XML example
 - paperAPI.py: api entry
 - d3.html: visualization demo (You need to replace the 'links' value [line 8, d3.html].)
  
 ## Requirements (python packages)
 
+- pdf_parser
 - uvicorn
 - fastapi
 - pydantic
@@ -30,7 +30,15 @@ Once the download is successful, these two lines of code must be removed.
 ## Run
 
 ```bash
+uvicorn paperAPI:app --reload --port 8000 --host 0.0.0.0
+```
+or
+```bash
 python paperAPI.py
 ```
+
+- GET: http://127.0.0.1:8000/paper2kg?paperID=ELG.pdf&confidence=0.6&fine_grain=false
+
+- POST: {"paperID": "ELG.pdf", "confidence": 0.1, "fine_grain": "False"}
 
 - API docs: http://127.0.0.1:8000/docs
