@@ -11,7 +11,7 @@ Generate Knowledge Graph for Paper
  
 ## Requirements (python packages)
 
-- pdf_parser
+- pdf_parser(based on AceMap Tools)
 - uvicorn
 - fastapi
 - pydantic
