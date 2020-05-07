@@ -11,7 +11,6 @@ Generate Knowledge Graph for Paper
  
 ## Requirements (python packages)
 
-- pdf_parser(based on AceMap Tools)
 - uvicorn
 - fastapi
 - pydantic
@@ -29,6 +28,9 @@ Once the download is successful, these two lines of code must be removed.
 
 ## Run
 
+No API: Configure readXML.py and run.
+
+or
 ```bash
 uvicorn paperAPI:app --reload --port 8000 --host 0.0.0.0
 ```
@@ -42,3 +44,7 @@ python paperAPI.py
 - POST: {"paperID": "ELG.pdf", "confidence": 0.1, "fine_grain": "False"}
 
 - API docs: http://127.0.0.1:8000/docs
+
+## Preview
+
+![](preview.png)

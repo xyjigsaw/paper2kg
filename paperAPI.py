@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from readXML import PaperXML
 from text2kg import text2kg_api
 import time
-from pdf_parser import Parser
+from toolkit.pdf_parser import Parser
 
 app = FastAPI()
 

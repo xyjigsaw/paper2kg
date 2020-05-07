@@ -6,6 +6,7 @@
 # *_*coding:utf-8 *_*
 
 from xml.dom.minidom import parse
+from toolkit.pdf_parser import Parser
 import os
 import time
 import nltk
@@ -361,7 +362,8 @@ class PaperXML:
 
 if __name__ == '__main__':
     start = time.time()
-    paper = PaperXML('output/acemap.cermine.xml')
-    # print(paper.get_secs()) output/acemap.cermine
+    parser = Parser('cermine')
+    parser.parse('text', 'ELG.pdf', 'output', 50)
+    paper = PaperXML('output/ELG.cermine.xml')
     paper.paper2kg_d3js(confidence=0.6, max_entity_len=4, fine_grain=False)
     print(time.time() - start)
