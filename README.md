@@ -8,6 +8,9 @@ Generate Knowledge Graph for Paper
 
 - paperAPI.py: api entry
 - d3.html: visualization demo (You need to replace the 'links' value [line 8, d3.html].)
+- toolkit
+  - Ollie: triple extractor
+  - pdf_parser: pdf2xml
  
 ## Requirements (python packages)
 
