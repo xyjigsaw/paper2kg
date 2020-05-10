@@ -216,17 +216,17 @@ class PaperXML:
 
         # 4 section->entity and entity->entity
         for _key in entity_rel:
-            print('---------------------------------')
-            print(_key)
+            # print('---------------------------------')
+            # print(_key)
 
             candidate_words = []
             for item in nltk.pos_tag(nltk.word_tokenize(_key)):
                 if item[1] in tags:
                     candidate_words.append(item[0])
-            print(candidate_words)
+            # print(candidate_words)
 
-            print(self.get_sec_id4NRE(_key))
-            print(entity_rel[_key])
+            # print(self.get_sec_id4NRE(_key))
+            # print(entity_rel[_key])
             for item in entity_rel[_key]:
                 if float(item['confidence']) < confidence:
                     continue
@@ -239,6 +239,7 @@ class PaperXML:
                     for w in words:
                         if w in candidate_words:
                             flag = True
+                            break
                     if not flag:
                         break
                 else:
@@ -248,12 +249,14 @@ class PaperXML:
                     for w in words:
                         if w in candidate_words:
                             flag = True
+                            break
                     if not flag:
                         break
                     flag = False
                     for w in words2:
                         if w in candidate_words:
                             flag = True
+                            break
                     if not flag:
                         break
 
@@ -313,6 +316,7 @@ class PaperXML:
                     for w in words:
                         if w in candidate_words:
                             flag = True
+                            break
                     if not flag:
                         break
                 else:
@@ -322,17 +326,20 @@ class PaperXML:
                     for w in words:
                         if w in candidate_words:
                             flag = True
+                            break
                     if not flag:
                         break
                     flag = False
                     for w in words2:
                         if w in candidate_words:
                             flag = True
+                            break
                     if not flag:
                         break
 
                 if len(triple) == 3:
-                    if len(triple[0].split()) <= max_entity_len and len(triple[2].split()) <= max_entity_len and len(triple[0].split()[0]) >= 2:
+                    if len(triple[0].split()) <= max_entity_len and len(triple[2].split()) <= max_entity_len and len(
+                            triple[0].split()[0]) >= 2:
                         # print(triple)
                         section_id = str(self.get_sec_id4NRE(_key))
                         tri = {'source': triple[0], 'target': triple[2], 'rela': triple[1],
@@ -363,7 +370,7 @@ class PaperXML:
 if __name__ == '__main__':
     start = time.time()
     parser = Parser('cermine')
-    parser.parse('text', 'ELG.pdf', 'output', 50)
+    parser.parse('text', 'ELG.pdf', 'output', 0)
     paper = PaperXML('output/ELG.cermine.xml')
     paper.paper2kg_d3js(confidence=0.6, max_entity_len=4, fine_grain=False)
     print(time.time() - start)
