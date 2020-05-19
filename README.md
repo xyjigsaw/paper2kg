@@ -4,6 +4,10 @@
 
 Generate Knowledge Graph for Paper
 
+# Extractor/Algorithm
+
+- Ollie, Java code can extract relation triples.
+
 ## Files
 
 - paperAPI.py: api entry
