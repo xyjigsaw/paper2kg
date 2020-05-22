@@ -118,6 +118,6 @@ async def post_text2kg(request: PostItem4Text2Kg):
 
 
 if __name__ == '__main__':
-    uvicorn.run(app=app, host="127.0.0.1", port=8000, workers=1)
+    uvicorn.run(app=app, host="0.0.0.0", port=8000, workers=1)
 
 # uvicorn paperAPI:app --reload --port 7000 --host 127.0.0.1

@@ -20,14 +20,17 @@ nltk.download('averaged_perceptron_tagger')
 
 class PaperXML:
     def __init__(self, file_path):
+        """
+        :param file_path: XML file path rather than PDF
+        """
         self.dom = parse(file_path)
         self.data = self.dom.documentElement
         self.paper_title = self.get_paper_title()
-        self.paper_year = self.get_paper_year()
-        self.paper_aff_dict = self.get_affiliation()
-        self.author_dict = self.get_author()
-        self.ref_dict = self.get_rf()
         self.section_dict = self.get_secs()
+        # self.ref_dict = self.get_rf()
+        # self.paper_aff_dict = self.get_affiliation()
+        # self.paper_year = self.get_paper_year()
+        # self.author_dict = self.get_author()
 
     def get_paper_title(self):
         try:
@@ -362,7 +365,8 @@ class PaperXML:
                             data4api[str(triple_id)] = tri
                             triple_id += 1
                         except KeyError as e:
-                            print(e, triple[0], triple[2])
+                            pass
+                            # print(e, triple[0], triple[2])
 
         return data4api
 
