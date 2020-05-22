@@ -6,7 +6,7 @@ Generate Knowledge Graph for Paper
 
 # Extractor/Algorithm
 
-- Ollie, Java code can extract relation triples.
+- Ollie, Java code extracts relation triples.
 
 ## Files
 
