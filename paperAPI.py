@@ -49,7 +49,7 @@ async def paper2kg(paperID: str, confidence: float, fine_grain: bool):
     parser.parse('text', paperID, 'output', 50)
     paper = PaperXML('output/' + paperID[:-3] + 'cermine.xml')
     api_data = paper.paper2kg_api(confidence=confidence, max_entity_len=4, fine_grain=fine_grain)
-    print(time.time() - start)
+    # print(time.time() - start)
     return {"message": "success", 'time': time.time() - start, 'data': api_data}
 
 
@@ -73,7 +73,7 @@ async def post_paper2kg(request: PostItem4Paper2Kg):
     parser.parse('text', paperID, 'output', 50)
     paper = PaperXML('output/' + paperID[:-3] + 'cermine.xml')
     api_data = paper.paper2kg_api(confidence=confidence, max_entity_len=4, fine_grain=fine_grain)
-    print(time.time() - start)
+    # print(time.time() - start)
     return {"message": "success", 'time': time.time() - start, 'data': api_data}
 
 
@@ -92,7 +92,7 @@ async def text2kg(text: str, confidence: float, fine_grain: bool):
     """
     start = time.time()
     api_data = text2kg_api(text=text, confidence=confidence, max_entity_len=4, fine_grain=fine_grain)
-    print(time.time() - start)
+    # print(time.time() - start)
     return {"message": "success", 'time': time.time() - start, 'data': api_data}
 
 
@@ -113,7 +113,7 @@ async def post_text2kg(request: PostItem4Text2Kg):
     confidence = float(request.confidence)
     fine_grain = bool(request.fine_grain)
     api_data = text2kg_api(text=text, confidence=confidence, max_entity_len=4, fine_grain=fine_grain)
-    print(time.time() - start)
+    # print(time.time() - start)
     return {"message": "success", 'time': time.time() - start, 'data': api_data}
 
 
