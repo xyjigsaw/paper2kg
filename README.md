@@ -55,3 +55,10 @@ python paperAPI.py
 ## Preview
 
 ![](preview.png)
+
+## Word Classes/tags for paper2api
+
+- NNP: proper noun, singular
+- NNPS: proper noun, plural
+- NN: noun, singular
+- NNS: noun, plural
