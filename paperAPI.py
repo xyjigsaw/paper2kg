@@ -31,7 +31,9 @@ data: KG data
             section_id: text position
 """
 
+#############################
 # paper2KG
+#############################
 
 
 @app.get("/paper2kg/")
@@ -78,8 +80,9 @@ async def post_paper2kg(request: PostItem4Paper2Kg):
     # print(time.time() - start)
     return {"message": "success", 'time': time.time() - start, 'data': api_data}
 
-
+#############################
 # text2KG
+#############################
 
 
 @app.get("/text2kg/")
