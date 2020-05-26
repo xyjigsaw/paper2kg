@@ -6,7 +6,7 @@ Generate Knowledge Graph for Paper
 
 # Extractor/Algorithm
 
-- Ollie, Java code extracts relation triples.
+- [Ollie](http://knowitall.github.io/ollie/), Java code extracts relation triples which has been integrated into the project.
 
 ## Files
 
@@ -32,6 +32,8 @@ nltk.download('averaged_perceptron_tagger')
 ```
 
 Once the download is successful, these two lines of code must be removed.
+
+PS: JAVA environment is requested.
 
 ## Run
 
