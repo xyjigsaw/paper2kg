@@ -8,6 +8,8 @@ Generate Knowledge Graph for Paper
 
 - [Ollie](http://knowitall.github.io/ollie/), Java code extracts relation triples which has been integrated into the project.
 
+Notice: BERT will be added.
+
 ## Files
 
 - paperAPI.py: api entry
