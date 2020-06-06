@@ -8,7 +8,7 @@ Generate Knowledge Graph for Paper
 
 - [Ollie](http://knowitall.github.io/ollie/), Java code extracts relation triples which has been integrated into the project.
 
-Notice: BERT will be added.
+Notice: BERT-BiLSTM-CRF will be added.
 
 ## Files
 
