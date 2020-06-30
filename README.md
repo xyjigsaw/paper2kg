@@ -1,6 +1,6 @@
 # paper2kg
 
-![](https://img.shields.io/badge/Status-Developing-brightgreen.svg)
+![](https://img.shields.io/badge/Status-Done-brightgreen.svg)
 
 Generate Knowledge Graph for Paper
 
