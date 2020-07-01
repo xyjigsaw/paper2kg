@@ -26,14 +26,14 @@ Notice: BERT-BiLSTM-CRF will be added.
 - xml
 - nltk
 
-Before using NLTK, you may need to add the following code to the top of readxml.py and text2kg.py
+**Before** using NLTK, you may need to add the following code to the top of readxml.py and text2kg.py
 
 ```
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 ```
 
-Once the download is successful, these two lines of code must be removed.
+**Once the download is successful, these two lines of code must be removed.**
 
 PS: JAVA environment is requested.
 
