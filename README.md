@@ -23,7 +23,6 @@ Notice: BERT-BiLSTM-CRF will be added.
 - uvicorn
 - fastapi
 - pydantic
-- xml
 - nltk
 
 **Before** using NLTK, you may need to add the following code to the top of readxml.py and text2kg.py
